@@ -1,5 +1,8 @@
 name: Release last WebRTC milestone
 
+permissions:
+  contents: write
+  
 on:
   schedule:
     - cron: '0 0 * * *'
