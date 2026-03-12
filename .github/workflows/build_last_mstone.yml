@@ -88,9 +88,24 @@ jobs:
         if: env.should_build == 'true'
         run: |
           cd src
-          echo "Applying jni_prefix_smile patch..."
-          patch -p1 < "${GITHUB_WORKSPACE}/patches/jni_prefix_smile.patch"
-          echo "Patch applied successfully!"
+          echo "Applying jni_prefix_smile patch with fuzzy matching..."
+
+          # Try git apply first (more forgiving)
+          if git apply --check --verbose "${GITHUB_WORKSPACE}/patches/jni_prefix_smile.patch" 2>&1; then
+            echo "Using git apply..."
+            git apply "${GITHUB_WORKSPACE}/patches/jni_prefix_smile.patch"
+          else
+            echo "git apply failed, trying patch with fuzz..."
+            # Fall back to patch with fuzzy matching (allows 3 lines of context mismatch)
+            patch -p1 --fuzz=3 --verbose < "${GITHUB_WORKSPACE}/patches/jni_prefix_smile.patch" || {
+              echo "❌ Patch failed!"
+              echo "Showing reject files:"
+              find . -name "*.rej" -exec echo "=== {} ===" \; -exec cat {} \;
+              exit 1
+            }
+          fi
+
+          echo "✓ Patch applied successfully!"
           echo "Verifying patch application..."
           grep -q "scxjingle_peerconnection_so" sdk/android/api/org/webrtc/PeerConnectionFactory.java && echo "✓ Library name updated" || echo "✗ Library name NOT updated"
           grep -q "cx/smile" sdk/android/src/jni/jni_helpers.h && echo "✓ JNI helpers updated" || echo "✗ JNI helpers NOT updated"
