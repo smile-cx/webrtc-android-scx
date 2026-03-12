@@ -74,12 +74,23 @@ jobs:
 
       - name: Checkout WebRTC
         if: env.should_build == 'true'
-        run: | 
-          source "${GITHUB_WORKSPACE}/scripts/checkout_webrtc.sh";                     
+        run: |
+          source "${GITHUB_WORKSPACE}/scripts/checkout_webrtc.sh";
           echo "${PATH}" >> $GITHUB_PATH
           echo ::set-output name=should_build::false
         env:
           WEBRTC_BRANCH: ${{ env.next_release_branch  }}
+
+      - name: Apply SmileCX patches
+        if: env.should_build == 'true'
+        run: |
+          cd src
+          echo "Applying jni_prefix_smile patch..."
+          patch -p1 < "${GITHUB_WORKSPACE}/patches/jni_prefix_smile.patch"
+          echo "Patch applied successfully!"
+          echo "Verifying patch application..."
+          grep -q "scxjingle_peerconnection_so" sdk/android/api/org/webrtc/PeerConnectionFactory.java && echo "✓ Library name updated" || echo "✗ Library name NOT updated"
+          grep -q "cx/smile" sdk/android/src/jni/jni_helpers.h && echo "✓ JNI helpers updated" || echo "✗ JNI helpers NOT updated"
 
       - name: Build WebRTC
         if: env.should_build == 'true'
