@@ -191,26 +191,6 @@ index d86c8fa4ad..30f307a2ca 100644
  #endif
 
  namespace webrtc {
-diff --git a/sdk/android/src/jni/simulcast_video_encoder.cc b/sdk/android/src/jni/simulcast_video_encoder.cc
-index 6d4ba5b3b6..48d3cb3541 100644
---- a/sdk/android/src/jni/simulcast_video_encoder.cc
-+++ b/sdk/android/src/jni/simulcast_video_encoder.cc
-@@ -15,7 +15,14 @@ extern "C" {
- #endif
-
- // (VideoEncoderFactory primary, VideoEncoderFactory fallback, VideoCodecInfo info)
--JNIEXPORT jlong JNICALL Java_org_webrtc_SimulcastVideoEncoder_nativeCreateEncoder(JNIEnv *env, jclass klass, jlong webrtcEnvRef, jobject primary, jobject fallback, jobject info) {
-+JNI_FUNCTION_DECLARATION(jlong,
-+                         SimulcastVideoEncoder_nativeCreateEncoder,
-+                         JNIEnv *env,
-+                         jclass klass,
-+                         jlong webrtcEnvRef,
-+                         jobject primary,
-+                         jobject fallback,
-+                         jobject info) {
-     RTC_LOG(LS_INFO) << "Create simulcast video encoder";
-     auto info_ref = JavaParamRef<jobject>::CreateLeaky(env, info);
-     SdpVideoFormat format = VideoCodecInfoToSdpVideoFormat(env, info_ref);
 diff --git a/tools_webrtc/android/build_aar.py b/tools_webrtc/android/build_aar.py
 index 2fbce97c60..130b3d5fa7 100755
 --- a/tools_webrtc/android/build_aar.py
