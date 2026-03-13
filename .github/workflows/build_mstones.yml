@@ -121,13 +121,13 @@ jobs:
       - name: Create SDK
         if: env.should_build == 'true'
         run: |
-          mv ./src/libwebrtc.aar .
+          mv ./src/libscxwebrtc.aar .
 
       - name: commit and push
         if: env.should_build == 'true'
-        run: |          
+        run: |
           git tag "${{ env.next_release_tag }}"
-                    
+
           remote_repo="https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
 
           git push "${remote_repo}" "M${{ env.next_release_milestone }}" --force --follow-tags --tags
@@ -136,4 +136,4 @@ jobs:
         if: env.should_build == 'true'
         run: |
           echo "Release notes: N/A\\nWebRTC Branch: [branch-heads/${{ env.next_release_branch }}](https://chromium.googlesource.com/external/webrtc/+log/branch-heads/${{ env.next_release_branch }})" >> changelog.md
-          gh release create "${{ env.next_release_tag }}" -t "M${{ env.next_release_milestone }}"  -F changelog.md "libwebrtc.aar"
+          gh release create "${{ env.next_release_tag }}" -t "M${{ env.next_release_milestone }}"  -F changelog.md "libscxwebrtc.aar"
