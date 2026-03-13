@@ -110,7 +110,7 @@ jobs:
           echo "✓ Patch applied successfully!"
           echo "Verifying patch application..."
           grep -q "scxjingle_peerconnection_so" sdk/android/api/org/webrtc/PeerConnectionFactory.java && echo "✓ Library name updated" || echo "✗ Library name NOT updated"
-          grep -q "cx/smile" sdk/android/src/jni/jni_helpers.h && echo "✓ JNI helpers updated" || echo "✗ JNI helpers NOT updated"
+          grep -q "Java_cx_smile_org_webrtc" sdk/android/src/jni/jni_helpers.h && echo "✓ JNI helpers updated" || echo "✗ JNI helpers NOT updated"
 
       - name: Build WebRTC
         if: env.should_build == 'true'
