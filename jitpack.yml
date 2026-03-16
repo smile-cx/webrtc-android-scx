@@ -1,0 +1,22 @@
+# JitPack configuration
+jdk:
+  - openjdk17
+
+before_install:
+  - echo "JitPack build configuration"
+
+install:
+  - echo "Downloading AAR from GitHub releases..."
+  - |
+    # Extract version from git tag
+    VERSION=${JITPACK_GIT_TAG:-${JITPACK_VERSION}}
+    echo "Building version: $VERSION"
+
+    # Download AAR from GitHub release
+    wget "https://github.com/smile-cx/webrtc-android-scx/releases/download/${VERSION}/libscxwebrtc.aar" -O libscxwebrtc.aar || {
+      echo "Failed to download AAR for version ${VERSION}"
+      exit 1
+    }
+
+    # Publish to local maven
+    ./gradlew publishToMavenLocal -PVERSION_NAME=${VERSION}
