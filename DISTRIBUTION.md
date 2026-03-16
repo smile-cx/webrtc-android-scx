@@ -20,7 +20,7 @@ In your app `build.gradle`:
 
 ```gradle
 dependencies {
-    implementation 'com.github.smile-cx:webrtc-android-scx:144.7559.01'
+    implementation 'com.github.smile-cx:webrtc-android-scx:M144'
 }
 ```
 
@@ -28,7 +28,7 @@ Or using version catalogs:
 
 ```toml
 [versions]
-smilecx-webrtc = "144.7559.01"
+smilecx-webrtc = "M144"
 
 [libraries]
 smilecx-webrtc = { module = "com.github.smile-cx:webrtc-android-scx", version.ref = "smilecx-webrtc" }
@@ -40,8 +40,8 @@ smilecx-webrtc = { module = "com.github.smile-cx:webrtc-android-scx", version.re
 
 The workflow automatically:
 - Builds WebRTC AAR with SmileCX prefixes
-- Creates GitHub release with `libscxwebrtc.aar`
-- Version tag: `<milestone>.<branch>.<patch>` (e.g., `144.7559.01`)
+- Creates GitHub release with tag `M<milestone>` and asset `libscxwebrtc.aar`
+- Examples: `M144`, `M146`, `M150`
 
 ### 2. JitPack Automatic Build
 
@@ -59,12 +59,13 @@ JitPack automatically builds when:
 
 Check build status: https://jitpack.io/com/github/smile-cx/webrtc-android-scx/<version>/build.log
 
-Example: https://jitpack.io/com/github/smile-cx/webrtc-android-scx/144.7559.01/build.log
+Example: https://jitpack.io/com/github/smile-cx/webrtc-android-scx/M144/build.log
 
 ## Versioning
 
-We use WebRTC milestone versions: `<milestone>.<branch>.<patch>`
-- Example: `144.7559.01` = Milestone 144, branch 7559, patch 01
+We use simple milestone tags: `M<milestone>`
+- Examples: `M144`, `M146`, `M150`
+- Corresponds to WebRTC milestone versions
 
 ## Troubleshooting
 
