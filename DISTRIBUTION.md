@@ -29,7 +29,7 @@ In your app `build.gradle`:
 
 ```gradle
 dependencies {
-    implementation 'com.github.smile-cx:webrtc-android-scx:M144'
+    implementation 'com.github.smile-cx:webrtc-android-scx:146'
 }
 ```
 
@@ -37,7 +37,7 @@ Or using version catalogs:
 
 ```toml
 [versions]
-smilecx-webrtc = "M144"
+smilecx-webrtc = "146"
 
 [libraries]
 smilecx-webrtc = { module = "com.github.smile-cx:webrtc-android-scx", version.ref = "smilecx-webrtc" }
@@ -120,9 +120,16 @@ Example: https://jitpack.io/com/github/smile-cx/webrtc-android-scx/M144/build.lo
 
 ## Versioning
 
-We use simple milestone tags: `M<milestone>`
-- Examples: `M144`, `M146`, `M150`
-- Corresponds to WebRTC milestone versions
+We use milestone-based versioning:
+- Git tag: milestone number only (e.g., `144`, `146`, `150`)
+- Release title: milestone with M prefix (e.g., `M144`, `M146`)
+- Release notes: include full WebRTC version (e.g., `146.7680.0`)
+
+Example:
+- Git tag: `146`
+- Release title: `M146`
+- Release notes: "WebRTC Version: 146.7680.0"
+- User dependency: `com.github.smile-cx:webrtc-android-scx:146`
 
 ## Troubleshooting
 

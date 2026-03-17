@@ -56,10 +56,11 @@ jobs:
           echo "next_release_branch=$(echo $milestones  | jq -r ".[0].webrtc_branch")" >> $GITHUB_ENV
           
       - name: Setup enviroment
-        run: |                    
-          echo "should_build=${{ env.next_release_branch > env.current_release_branch }}" >> $GITHUB_ENV    
-          echo "next_release_name=M${{ env.next_release_milestone }}" >> $GITHUB_ENV    
-          echo "next_release_tag=${{ env.next_release_milestone }}.${{ env.next_release_branch }}.0" >> $GITHUB_ENV    
+        run: |
+          echo "should_build=${{ env.next_release_branch > env.current_release_branch }}" >> $GITHUB_ENV
+          echo "next_release_name=M${{ env.next_release_milestone }}" >> $GITHUB_ENV
+          echo "next_release_tag=${{ env.next_release_milestone }}" >> $GITHUB_ENV
+          echo "next_full_version=${{ env.next_release_milestone }}.${{ env.next_release_branch }}.0" >> $GITHUB_ENV    
           
 
       - name: Create branch
@@ -133,7 +134,9 @@ jobs:
       - name: Create prerelease
         if: env.should_build == 'true'
         run: |
-          echo "Release notes: N/A\nWebRTC Branch: [branch-heads/${{ env.next_release_branch }}](https://chromium.googlesource.com/external/webrtc/+log/branch-heads/${{ env.next_release_branch }})" >> changelog.md
+          echo "WebRTC Version: ${{ env.next_full_version }}" >> changelog.md
+          echo "" >> changelog.md
+          echo "WebRTC Branch: [branch-heads/${{ env.next_release_branch }}](https://chromium.googlesource.com/external/webrtc/+log/branch-heads/${{ env.next_release_branch }})" >> changelog.md
           gh release create "${{ env.next_release_tag }}" -t "M${{ env.next_release_milestone }}"  -F changelog.md "libscxwebrtc.aar"
 
       - name: Trigger JitPack build

@@ -34,7 +34,7 @@ Add the dependency:
 
 ```gradle
 dependencies {
-    implementation 'com.github.smile-cx:webrtc-android-scx:M144'
+    implementation 'com.github.smile-cx:webrtc-android-scx:146'
 }
 ```
 
@@ -54,11 +54,13 @@ PeerConnectionFactory factory = PeerConnectionFactory.builder().createPeerConnec
 
 ## Versioning
 
-We use milestone-based versioning: `M<milestone>`
+We use milestone-based versioning:
 
-- `M144` - WebRTC Milestone 144
-- `M146` - WebRTC Milestone 146
+- `144` - WebRTC Milestone 144
+- `146` - WebRTC Milestone 146
 - etc.
+
+Each release includes the full WebRTC version in the release notes (e.g., 146.7680.0).
 
 ## How It Works
 
