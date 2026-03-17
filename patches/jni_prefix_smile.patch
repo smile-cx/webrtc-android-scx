@@ -38,11 +38,10 @@ index 21687fa76c..f1a2627238 100644
      sources = [ "src/jni/jni_onload.cc" ]
  
      suppressed_configs += [ "//build/config/android:hide_all_but_jni_onload" ]
-@@ -1409,11 +1410,13 @@ if (current_os == "linux" || is_android) {
+@@ -1409,11 +1410,12 @@ if (current_os == "linux" || is_android) {
    generate_jni("generated_environment_jni") {
      sources = [ "api/org/webrtc/Environment.java" ]
      namespace = "webrtc::jni"
-+    package_prefix = android_package_prefix
    }
  
    generate_jni("generated_metrics_jni") {

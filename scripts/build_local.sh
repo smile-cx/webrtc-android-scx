@@ -5,6 +5,10 @@
 
 set -e
 
+# Determine script and repo directories at the start
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 WEBRTC_BRANCH="${1:-7680}"
 BUILD_DIR="${2:-$(pwd)/local-build}"
 
@@ -53,8 +57,6 @@ gclient sync --with_branch_heads --with_tags
 cd src
 
 # Step 5: Apply SmileCX patches
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 PATCH_FILE="$REPO_DIR/patches/jni_prefix_smile.patch"
 
 echo "🩹 Applying SmileCX patches..."
