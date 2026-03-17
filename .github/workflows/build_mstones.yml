@@ -137,3 +137,10 @@ jobs:
         run: |
           echo "Release notes: N/A\\nWebRTC Branch: [branch-heads/${{ env.next_release_branch }}](https://chromium.googlesource.com/external/webrtc/+log/branch-heads/${{ env.next_release_branch }})" >> changelog.md
           gh release create "${{ env.next_release_tag }}" -t "M${{ env.next_release_milestone }}"  -F changelog.md "libscxwebrtc.aar"
+
+      - name: Trigger JitPack build
+        if: env.should_build == 'true'
+        run: |
+          echo "Triggering JitPack build for version ${{ env.next_release_tag }}"
+          curl -s "https://jitpack.io/api/builds/com.github.smile-cx/webrtc-android-scx/${{ env.next_release_tag }}"
+          echo "JitPack build triggered. Check status at: https://jitpack.io/com/github/smile-cx/webrtc-android-scx/${{ env.next_release_tag }}/build.log"
