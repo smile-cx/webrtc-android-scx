@@ -32,23 +32,25 @@ index 21687fa76c..f1a2627238 100644
 +++ b/sdk/android/BUILD.gn
 @@ -127,6 +127,7 @@ if (is_android) {
    }
- 
+
    rtc_shared_library("libjingle_peerconnection_so") {
 +    output_name = "libscxjingle_peerconnection_so"
      sources = [ "src/jni/jni_onload.cc" ]
- 
+
      suppressed_configs += [ "//build/config/android:hide_all_but_jni_onload" ]
-@@ -1409,11 +1410,11 @@ if (current_os == "linux" || is_android) {
+@@ -1409,11 +1410,13 @@ if (current_os == "linux" || is_android) {
    generate_jni("generated_environment_jni") {
      sources = [ "api/org/webrtc/Environment.java" ]
      namespace = "webrtc::jni"
++    package_prefix = android_package_prefix
    }
 
    generate_jni("generated_metrics_jni") {
      sources = [ "api/org/webrtc/Metrics.java" ]
      namespace = "webrtc::jni"
++    package_prefix = android_package_prefix
    }
- 
+
    # Generated JNI for public JNI targets, matching order of targets
 @@ -1427,6 +1430,7 @@ if (current_os == "linux" || is_android) {
        "src/java/org/webrtc/JniCommon.java",
@@ -56,7 +58,7 @@ index 21687fa76c..f1a2627238 100644
      namespace = "webrtc::jni"
 +    package_prefix = android_package_prefix
    }
- 
+
    generate_jni("generated_video_jni") {
 @@ -1456,11 +1460,13 @@ if (current_os == "linux" || is_android) {
        "src/java/org/webrtc/WrappedNativeI420Buffer.java",
@@ -64,57 +66,57 @@ index 21687fa76c..f1a2627238 100644
      namespace = "webrtc::jni"
 +    package_prefix = android_package_prefix
    }
- 
+
    generate_jni("generated_video_egl_jni") {
      sources = [ "src/java/org/webrtc/EglBase10Impl.java" ]
      namespace = "webrtc::jni"
 +    package_prefix = android_package_prefix
    }
- 
+
    generate_jni("generated_libvpx_vp8_jni") {
 @@ -1470,6 +1476,7 @@ if (current_os == "linux" || is_android) {
      ]
- 
+
      namespace = "webrtc::jni"
 +    package_prefix = android_package_prefix
    }
- 
+
    generate_jni("generated_libvpx_vp9_jni") {
 @@ -1479,18 +1486,21 @@ if (current_os == "linux" || is_android) {
      ]
- 
+
      namespace = "webrtc::jni"
 +    package_prefix = android_package_prefix
    }
- 
+
    generate_jni("generated_libaom_av1_encoder_jni") {
      sources = [ "api/org/webrtc/LibaomAv1Encoder.java" ]
- 
+
      namespace = "webrtc::jni"
 +    package_prefix = android_package_prefix
    }
- 
+
    generate_jni("generated_dav1d_jni") {
      sources = [ "api/org/webrtc/Dav1dDecoder.java" ]
- 
+
      namespace = "webrtc::jni"
 +    package_prefix = android_package_prefix
    }
- 
+
    generate_jni("generated_swcodecs_jni") {
 @@ -1500,11 +1510,13 @@ if (current_os == "linux" || is_android) {
      ]
- 
+
      namespace = "webrtc::jni"
 +    package_prefix = android_package_prefix
    }
- 
+
    generate_jni("generated_rtcerror_jni") {
      sources = [ "src/java/org/webrtc/RtcError.java" ]
      namespace = "webrtc::jni"
 +    package_prefix = android_package_prefix
    }
- 
+
    generate_jni("generated_peerconnection_jni") {
 @@ -1541,11 +1553,13 @@ if (current_os == "linux" || is_android) {
        "api/org/webrtc/TurnCustomizer.java",
@@ -122,13 +124,13 @@ index 21687fa76c..f1a2627238 100644
      namespace = "webrtc::jni"
 +    package_prefix = android_package_prefix
    }
- 
+
    generate_jni("generated_java_audio_jni") {
      sources = [ "api/org/webrtc/audio/JavaAudioDeviceModule.java" ]
      namespace = "webrtc::jni"
 +    package_prefix = android_package_prefix
    }
- 
+
    generate_jni("generated_builtin_audio_codecs_jni") {
 @@ -1554,6 +1568,7 @@ if (current_os == "linux" || is_android) {
        "api/org/webrtc/BuiltinAudioEncoderFactoryFactory.java",
@@ -136,7 +138,7 @@ index 21687fa76c..f1a2627238 100644
      namespace = "webrtc::jni"
 +    package_prefix = android_package_prefix
    }
- 
+
    # Generated JNI for native API targets
 @@ -1565,17 +1580,20 @@ if (current_os == "linux" || is_android) {
        "src/java/org/webrtc/WebRtcClassLoader.java",
@@ -144,20 +146,20 @@ index 21687fa76c..f1a2627238 100644
      namespace = "webrtc::jni"
 +    package_prefix = android_package_prefix
    }
- 
+
    # Generated JNI for internal targets.
- 
+
    generate_jni("generated_logging_jni") {
      sources = [ "src/java/org/webrtc/JNILogging.java" ]
 +    package_prefix = android_package_prefix
    }
- 
+
    generate_jni("generated_audio_device_module_base_jni") {
      sources = [ "src/java/org/webrtc/audio/WebRtcAudioManager.java" ]
      namespace = "webrtc::jni"
 +    package_prefix = android_package_prefix
    }
- 
+
    generate_jni("generated_java_audio_device_module_native_jni") {
 @@ -1584,6 +1602,7 @@ if (current_os == "linux" || is_android) {
        "src/java/org/webrtc/audio/WebRtcAudioTrack.java",
@@ -166,14 +168,14 @@ index 21687fa76c..f1a2627238 100644
 +    package_prefix = android_package_prefix
    }
  }
- 
+
 @@ -1837,6 +1856,7 @@ if (is_android) {
        "native_unittests/org/webrtc/PeerConnectionFactoryInitializationHelper.java",
      ]
      namespace = "webrtc::jni"
 +    package_prefix = android_package_prefix
    }
- 
+
    robolectric_binary("android_sdk_junit_tests") {
 diff --git a/sdk/android/api/org/webrtc/PeerConnectionFactory.java b/sdk/android/api/org/webrtc/PeerConnectionFactory.java
 index 857b23c69c..72140d02fe 100644
@@ -187,7 +189,7 @@ index 857b23c69c..72140d02fe 100644
 +      private String nativeLibraryName = "scxjingle_peerconnection_so";
        @Nullable private Loggable loggable;
        @Nullable private Severity loggableSeverity;
- 
+
 diff --git a/sdk/android/src/jni/jni_helpers.h b/sdk/android/src/jni/jni_helpers.h
 index d86c8fa4ad..f3317bd5b7 100644
 --- a/sdk/android/src/jni/jni_helpers.h
@@ -203,8 +205,104 @@ index d86c8fa4ad..f3317bd5b7 100644
 -  extern "C" JNIEXPORT rettype JNICALL Java_org_webrtc_##name(__VA_ARGS__)
 +  extern "C" JNIEXPORT rettype JNICALL Java_cx_smile_org_webrtc_##name(__VA_ARGS__)
  #endif
- 
+
  namespace webrtc {
+diff --git a/sdk/android/src/jni/simulcast_video_encoder.cc b/sdk/android/src/jni/simulcast_video_encoder.cc
+index 6d4ba5b3b6..48d3cb3541 100644
+--- a/sdk/android/src/jni/simulcast_video_encoder.cc
++++ b/sdk/android/src/jni/simulcast_video_encoder.cc
+@@ -15,7 +15,14 @@ extern "C" {
+ #endif
+
+ // (VideoEncoderFactory primary, VideoEncoderFactory fallback, VideoCodecInfo info)
+-JNIEXPORT jlong JNICALL Java_org_webrtc_SimulcastVideoEncoder_nativeCreateEncoder(JNIEnv *env, jclass klass, jlong webrtcEnvRef, jobject primary, jobject fallback, jobject info) {
++JNI_FUNCTION_DECLARATION(jlong,
++                         SimulcastVideoEncoder_nativeCreateEncoder,
++                         JNIEnv *env,
++                         jclass klass,
++                         jlong webrtcEnvRef,
++                         jobject primary,
++                         jobject fallback,
++                         jobject info) {
+     RTC_LOG(LS_INFO) << "Create simulcast video encoder";
+     auto info_ref = JavaParamRef<jobject>::CreateLeaky(env, info);
+     SdpVideoFormat format = VideoCodecInfoToSdpVideoFormat(env, info_ref);
+diff --git a/third_party/jni_zero/BUILD.gn b/third_party/jni_zero/BUILD.gn
+index 7056bdd033c1..2b97de476de7 100644
+--- a/third_party/jni_zero/BUILD.gn
++++ b/third_party/jni_zero/BUILD.gn
+@@ -17,6 +17,7 @@ generate_jni("generate_jni") {
+     ":*",
+     "//components/cronet/android/*",
+   ]
++  package_prefix = "cx/smile"
+ }
+
+ generate_jar_jni("system_jni") {
+diff --git a/third_party/jni_zero/codegen/header_common.py b/third_party/jni_zero/codegen/header_common.py
+index 338cd748079f..be2577281a91 100644
+--- a/third_party/jni_zero/codegen/header_common.py
++++ b/third_party/jni_zero/codegen/header_common.py
+@@ -12,7 +12,8 @@ def class_accessors(sb, java_classes, module_name):
+   for java_class in java_classes:
+     if java_class in (java_types.OBJECT_CLASS, java_types.STRING_CLASS):
+       continue
+-    escaped_name = java_class.to_cpp()
++    escaped_name = java_class.class_without_prefix.to_cpp()
++    print("header accessor: ", escaped_name)
+     # #ifdef needed when multple .h files are #included that common classes.
+     sb(f"""\
+ #ifndef {escaped_name}_clazz_defined
+@@ -44,7 +45,7 @@ def class_accessor_expression(java_class):
+   if java_class == java_types.STRING_CLASS:
+     return 'jni_zero::g_string_class'
+
+-  return f'{java_class.to_cpp()}_clazz(env)'
++  return f'{java_class.class_without_prefix.to_cpp()}_clazz(env)'
+
+
+ def header_preamble(script_name,
+@@ -53,7 +54,7 @@ def header_preamble(script_name,
+                     user_includes=None,
+                     header_guard=None):
+   if header_guard is None:
+-    header_guard = f'{java_class.to_cpp()}_JNI'
++    header_guard = f'{java_class.class_without_prefix.to_cpp()}_JNI'
+   sb = []
+   sb.append(f"""\
+ // This file was generated by
+diff --git a/third_party/jni_zero/jni_zero.gni b/third_party/jni_zero/jni_zero.gni
+index 71826b906d10..22d8eaf6e232 100644
+--- a/third_party/jni_zero/jni_zero.gni
++++ b/third_party/jni_zero/jni_zero.gni
+@@ -123,7 +123,7 @@ template("_invoke_jni_zero") {
+ #   namespace: Registration functions will be wrapped into this. (optional)
+ #   priority_java_targets: List of java targets that, if using multiplexing,
+ #     will always be placed first in the sequential switch numbers. (optional)
+-#
++#   package_prefix: package prefix to add to jni
+ # Example
+ #   generate_jni_registration("chrome_jni_registration") {
+ #     java_targets = [ ":chrome_public_apk" ]
+@@ -327,6 +327,7 @@ template("generate_jni_impl") {
+                                "deps",
+                                "metadata",
+                                "public_deps",
++                               "package_prefix",
+                              ])
+       if (!defined(public_deps)) {
+         public_deps = []
+@@ -421,7 +422,9 @@ template("generate_jni_impl") {
+       if (defined(invoker.split_name)) {
+         args += [ "--split-name=${invoker.split_name}" ]
+       }
+-
++      if (defined(package_prefix)) {
++        args += [ "--package-prefix=${package_prefix}" ]
++      }
+       foreach(_name, _input_names) {
+         _name =
+             string_replace(get_path_info(_name, "name"), "\$", "__") + "_jni.h"
 diff --git a/tools_webrtc/android/build_aar.py b/tools_webrtc/android/build_aar.py
 index 2fbce97c60..006c3c1881 100755
 --- a/tools_webrtc/android/build_aar.py
@@ -220,12 +318,12 @@ index 2fbce97c60..006c3c1881 100755
  TARGETS = [
 @@ -254,7 +254,7 @@ def BuildAar(build_dir,
              Collect(aar_file, build_dir, arch, unstripped)
- 
+
      license_dir = os.path.dirname(os.path.realpath(output_file))
 -    GenerateLicenses(license_dir, build_dir, archs)
 +    #GenerateLicenses(license_dir, build_dir, archs)
- 
- 
+
+
  def main():
 diff --git a/webrtc.gni b/webrtc.gni
 index 64a739ca92..3ddd73bf73 100644
@@ -234,7 +332,7 @@ index 64a739ca92..3ddd73bf73 100644
 @@ -238,6 +238,10 @@ declare_args() {
    #          hasn't been registered.
    rtc_strict_field_trials = ""
- 
+
 +  if (is_android) {
 +    android_package_prefix = "cx/smile"
 +  }
