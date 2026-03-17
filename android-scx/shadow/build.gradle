@@ -1,0 +1,27 @@
+plugins {
+    id 'java-library'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+dependencies {
+    api files("libs/classes.jar")
+}
+
+shadowJar {
+    // Relocate all packages to cx.smile prefix
+    relocate 'org.webrtc', 'cx.smile.org.webrtc'
+}
+
+import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
+
+task relocateShadowJar(type: ConfigureShadowRelocation) {
+    target = tasks.shadowJar
+    prefix = "cx.smile"
+}
+
+tasks.shadowJar.dependsOn tasks.relocateShadowJar

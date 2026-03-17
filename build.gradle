@@ -3,56 +3,13 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        gradlePluginPortal()
     }
-}
-
-plugins {
-    id 'maven-publish'
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.0'
+        classpath 'com.github.kezong:fat-aar:1.3.8'
+    }
 }
 
 group = 'cx.smile'
 version = findProperty('VERSION_NAME') ?: '1.0.0'
-
-publishing {
-    publications {
-        release(MavenPublication) {
-            groupId = 'cx.smile'
-            artifactId = 'webrtc-android'
-            version = project.version
-
-            // The AAR will be uploaded as release artifact
-            artifact("${projectDir}/libscxwebrtc.aar")
-
-            pom {
-                name = 'SmileCX WebRTC Android'
-                description = 'WebRTC library for Android with SmileCX symbol prefixes to prevent collisions'
-                url = 'https://github.com/smile-cx/webrtc-android-scx'
-
-                licenses {
-                    license {
-                        name = 'BSD 3-Clause License'
-                        url = 'https://opensource.org/licenses/BSD-3-Clause'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id = 'smile-cx'
-                        name = 'SmileCX Team'
-                        organization = 'SmileCX'
-                    }
-                }
-
-                scm {
-                    connection = 'scm:git:git://github.com/smile-cx/webrtc-android-scx.git'
-                    developerConnection = 'scm:git:ssh://github.com:smile-cx/webrtc-android-scx.git'
-                    url = 'https://github.com/smile-cx/webrtc-android-scx'
-                }
-            }
-        }
-    }
-}
-
-// Required for JitPack
-task install(dependsOn: publishToMavenLocal) {
-}

@@ -1,0 +1,80 @@
+plugins {
+    id 'com.android.library'
+    id 'com.kezong.fat-aar'
+    id 'maven-publish'
+}
+
+android {
+    namespace 'cx.smile.webrtc'
+    compileSdk 33
+
+    defaultConfig {
+        minSdk 21
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    afterEvaluate {
+        generateReleaseBuildConfig.enabled = false
+        generateDebugBuildConfig.enabled = false
+        generateReleaseResValues.enabled = false
+        generateDebugResValues.enabled = false
+    }
+}
+
+dependencies {
+    compileOnly project(path: ':android-scx:shadow', configuration: 'shadow')
+    embed project(path: ':android-scx:shadow', configuration: 'shadow')
+}
+
+def POM_ARTIFACT_ID = "webrtc-android"
+
+afterEvaluate {
+    publishing {
+        publications {
+            androidScx(MavenPublication) {
+                from components.release
+
+                groupId = 'cx.smile'
+                artifactId = POM_ARTIFACT_ID
+                version = project.version
+
+                pom {
+                    name = 'SmileCX WebRTC Android'
+                    description = 'WebRTC library for Android with SmileCX symbol prefixes to prevent collisions'
+                    url = 'https://github.com/smile-cx/webrtc-android-scx'
+
+                    licenses {
+                        license {
+                            name = 'BSD 3-Clause License'
+                            url = 'https://opensource.org/licenses/BSD-3-Clause'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = 'smile-cx'
+                            name = 'SmileCX Team'
+                            organization = 'SmileCX'
+                        }
+                    }
+
+                    scm {
+                        connection = 'scm:git:git://github.com/smile-cx/webrtc-android-scx.git'
+                        developerConnection = 'scm:git:ssh://github.com:smile-cx/webrtc-android-scx.git'
+                        url = 'https://github.com/smile-cx/webrtc-android-scx'
+                    }
+                }
+            }
+        }
+    }
+}
