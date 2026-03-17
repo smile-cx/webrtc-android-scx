@@ -120,13 +120,15 @@ Example: https://jitpack.io/com/github/smile-cx/webrtc-android-scx/M144/build.lo
 
 ## Versioning
 
-We use milestone-based versioning:
-- Git tag: milestone number only (e.g., `144`, `146`, `150`)
-- Release title: milestone with M prefix (e.g., `M144`, `M146`)
-- Release notes: include full WebRTC version (e.g., `146.7680.0`)
+We use a dual-tagging strategy:
+- **Full version tag**: e.g., `146.7680.0` (unique, immutable, used for GitHub releases)
+- **Milestone tag**: e.g., `146` (mutable, force-updated, used by JitPack)
+
+When a new branch version is built for the same milestone (e.g., 146.7680.1), the milestone tag `146` is force-updated to point to the newer version.
 
 Example:
-- Git tag: `146`
+- Full version tag: `146.7680.0`
+- Milestone tag: `146` (points to 146.7680.0, updated if 146.7680.1 is released)
 - Release title: `M146`
 - Release notes: "WebRTC Version: 146.7680.0"
 - User dependency: `com.github.smile-cx:webrtc-android-scx:146`

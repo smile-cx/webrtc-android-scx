@@ -59,8 +59,8 @@ jobs:
         run: |
           echo "should_build=${{ env.next_release_branch > env.current_release_branch }}" >> $GITHUB_ENV
           echo "next_release_name=M${{ env.next_release_milestone }}" >> $GITHUB_ENV
-          echo "next_release_tag=${{ env.next_release_milestone }}" >> $GITHUB_ENV
-          echo "next_full_version=${{ env.next_release_milestone }}.${{ env.next_release_branch }}.0" >> $GITHUB_ENV    
+          echo "next_release_tag=${{ env.next_release_milestone }}.${{ env.next_release_branch }}.0" >> $GITHUB_ENV
+          echo "next_milestone_tag=${{ env.next_release_milestone }}" >> $GITHUB_ENV    
           
 
       - name: Checkout WebRTC
@@ -109,18 +109,26 @@ jobs:
         run: |
           mv ./src/libscxwebrtc.aar .
 
-      - name: Create and push tag
+      - name: Create and push tags
         if: env.should_build == 'true'
         run: |
           git config --local user.email "${{ github.actor }}[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
+
+          # Create full version tag
           git tag "${{ env.next_release_tag }}"
+
+          # Create/update milestone tag (force to allow updates)
+          git tag -f "${{ env.next_milestone_tag }}"
+
+          # Push both tags (force for milestone tag)
           git push origin "${{ env.next_release_tag }}"
+          git push -f origin "${{ env.next_milestone_tag }}"
 
       - name: Create prerelease
         if: env.should_build == 'true'
         run: |
-          echo "WebRTC Version: ${{ env.next_full_version }}" >> changelog.md
+          echo "WebRTC Version: ${{ env.next_release_tag }}" >> changelog.md
           echo "" >> changelog.md
           echo "WebRTC Branch: [branch-heads/${{ env.next_release_branch }}](https://chromium.googlesource.com/external/webrtc/+log/branch-heads/${{ env.next_release_branch }})" >> changelog.md
           gh release create "${{ env.next_release_tag }}" -t "M${{ env.next_release_milestone }}"  -F changelog.md "libscxwebrtc.aar"
@@ -128,6 +136,6 @@ jobs:
       - name: Trigger JitPack build
         if: env.should_build == 'true'
         run: |
-          echo "Triggering JitPack build for version ${{ env.next_release_tag }}"
-          curl -s "https://jitpack.io/api/builds/com.github.smile-cx/webrtc-android-scx/${{ env.next_release_tag }}"
-          echo "JitPack build triggered. Check status at: https://jitpack.io/com/github/smile-cx/webrtc-android-scx/${{ env.next_release_tag }}/build.log"
+          echo "Triggering JitPack build for version ${{ env.next_milestone_tag }}"
+          curl -s "https://jitpack.io/api/builds/com.github.smile-cx/webrtc-android-scx/${{ env.next_milestone_tag }}"
+          echo "JitPack build triggered. Check status at: https://jitpack.io/com/github/smile-cx/webrtc-android-scx/${{ env.next_milestone_tag }}/build.log"
