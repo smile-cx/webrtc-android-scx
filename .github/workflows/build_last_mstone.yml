@@ -63,19 +63,6 @@ jobs:
           echo "next_full_version=${{ env.next_release_milestone }}.${{ env.next_release_branch }}.0" >> $GITHUB_ENV    
           
 
-      - name: Create branch
-        if: env.should_build == 'true'
-        run: |
-          git config --local user.email "${{ github.actor }}[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"                    
-
-          git branch M${{ env.next_release_milestone }} -f
-          git checkout M${{ env.next_release_milestone }}
-
-          remote_repo="https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
-
-          git push "${remote_repo}" "M${{ env.next_release_milestone }}" --force --follow-tags --tags
-
       - name: Checkout WebRTC
         if: env.should_build == 'true'
         run: |
@@ -122,14 +109,13 @@ jobs:
         run: |
           mv ./src/libscxwebrtc.aar .
 
-      - name: commit and push
+      - name: Create and push tag
         if: env.should_build == 'true'
         run: |
+          git config --local user.email "${{ github.actor }}[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git tag "${{ env.next_release_tag }}"
-
-          remote_repo="https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
-
-          git push "${remote_repo}" "M${{ env.next_release_milestone }}" --force --follow-tags --tags
+          git push origin "${{ env.next_release_tag }}"
 
       - name: Create prerelease
         if: env.should_build == 'true'
