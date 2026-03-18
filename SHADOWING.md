@@ -22,14 +22,14 @@ Applied via patches during WebRTC build:
 
 **Result**: `libscxwebrtc.aar` with prefixed native symbols
 
-### Layer 2: Java Package Relocation (Applied at Distribution Time)
+### Layer 2: Java Package Relocation (Applied in GitHub Workflow)
 
-Applied via Gradle Shadow plugin during JitPack build:
+Applied via Gradle Shadow plugin during GitHub Actions build:
 - Java packages: `org.webrtc.*` → `cx.smile.org.webrtc.*`
 - Bytecode transformation (not source rewrite)
 - All references updated automatically
 
-**Result**: Final AAR with both native and Java isolation
+**Result**: `libscxwebrtc.aar` in GitHub releases is pre-shadowed with both native and Java isolation
 
 ## Implementation Details
 
@@ -92,16 +92,29 @@ dependencies {
 - Includes native libraries from `src/main/jniLibs/`
 - Produces final AAR for distribution
 
-## JitPack Build Flow
+## GitHub Workflow Shadowing
 
-1. **Download**: Fetch `libscxwebrtc.aar` from GitHub release
-2. **Extract**: Unzip AAR to get `classes.jar` and `.so` files
+The shadowing happens automatically in GitHub Actions (`.github/workflows/`):
+
+1. **Build Base AAR**: WebRTC build with JNI prefix → `libscxwebrtc.aar`
+2. **Extract**: Unzip AAR to get `classes.jar` and native `.so` files
 3. **Prepare**:
    - Copy `classes.jar` → `android-scx/shadow/libs/`
-   - Copy `.so` files → `android-scx/src/main/jniLibs/`
-4. **Shadow**: Run `shadowJar` task to relocate packages
-5. **Repackage**: Run `assembleRelease` to create final AAR with fat-aar
-6. **Publish**: Publish to JitPack Maven repository
+4. **Shadow**: Run `shadowJar` task to relocate Java packages
+5. **Repackage**: Replace `classes.jar` in AAR with shadowed version
+6. **Publish**: Upload pre-shadowed `libscxwebrtc.aar` to GitHub release
+
+**Result**: GitHub releases contain fully shadowed AAR ready for direct use.
+
+## JitPack Build Flow (Optional)
+
+JitPack can republish the pre-shadowed AAR from GitHub releases:
+
+1. **Download**: Fetch pre-shadowed `libscxwebrtc.aar` from GitHub release
+2. **Republish**: Publish to JitPack Maven repository
+3. **Cache**: Store for future requests
+
+**Note**: Shadowing is already done in the GitHub workflow, so JitPack just republishes the artifact.
 
 ## Why This Approach?
 

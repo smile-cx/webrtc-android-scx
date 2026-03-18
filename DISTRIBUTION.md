@@ -56,82 +56,111 @@ import cx.smile.org.webrtc.VideoTrack;
 
 ## For Maintainers - Publishing New Releases
 
-### 1. Build & Release (via GitHub Actions)
+### Automated Daily Workflow
 
-The workflow automatically:
-- Builds WebRTC AAR with SmileCX JNI prefixes (`libscxwebrtc.aar`)
-- Creates GitHub release with tag `M<milestone>` and asset `libscxwebrtc.aar`
-- Examples: `M144`, `M146`, `M150`
+The repository has two GitHub Actions workflows:
 
-### 2. JitPack Automatic Build with Shadowing
+1. **Scheduled Workflow** (`build_last_mstone.yml`) - Runs daily at midnight (UTC)
+   - Checks for new stable WebRTC milestones
+   - **Smart build detection**: Only rebuilds if new branch detected (~30 min)
+   - **Fast path**: Reuses existing AAR if same branch (~1 min)
+   - Applies shadowing automatically in the workflow
 
-JitPack automatically builds when:
-1. User requests the version
-2. GitHub release exists with matching tag
-3. `libscxwebrtc.aar` is present in release assets
+2. **On-Demand Workflow** (`build_mstones.yml`) - Manual trigger for specific milestones
+   - Build specific milestone versions
+   - Can reuse existing AAR or force rebuild
 
-**JitPack Build Process:**
-1. Downloads `libscxwebrtc.aar` from GitHub release
-2. Extracts AAR contents (classes.jar + native libraries)
-3. Uses Shadow Gradle plugin to relocate Java packages: `org.webrtc.*` → `cx.smile.org.webrtc.*`
-4. Repackages with fat-aar plugin (shadowed JAR + native libs)
-5. Publishes final AAR to JitPack Maven repository
-6. Caches for future requests
+### What the Workflows Do
 
-### 3. Local Testing (Optional)
+**For new WebRTC branches:**
+1. Checkout WebRTC source
+2. Apply SmileCX patches (JNI prefix: `scx`)
+3. Build WebRTC AAR (`libscxwebrtc.aar`)
+4. Apply Java package shadowing: `org.webrtc.*` → `cx.smile.org.webrtc.*`
+5. Create/update milestone tag (e.g., `146`)
+6. Create or update GitHub release with shadowed AAR
+
+**For existing releases (same branch):**
+1. Download existing AAR from release
+2. Check if already shadowed
+3. Apply shadowing if needed (~1 min vs ~30 min rebuild)
+4. Update release with shadowed AAR
+5. Skip tag push if only shadowing
+
+### Shadowing Process (in GitHub Workflow)
+
+The workflow applies Java package relocation using Gradle Shadow plugin:
+
+```yaml
+# Extract base AAR
+unzip -q libscxwebrtc.aar -d aar-extract/
+
+# Run shadow JAR creation
+./gradlew :android-scx:shadow:shadowJar
+
+# Replace classes.jar with shadowed version
+cp android-scx/shadow/build/libs/webrtc-shadowed.jar aar-extract/classes.jar
+
+# Repackage AAR
+zip -r libscxwebrtc-shadowed.aar aar-extract/*
+```
+
+**Result**: `libscxwebrtc.aar` in GitHub releases is **pre-shadowed** and ready to use.
+
+### Local Testing (Optional)
 
 To test the shadowing process locally:
 
 ```bash
-# Prepare AAR for shadowing
-./prepare_aar.sh /path/to/libscxwebrtc.aar
-
-# Build the shadowed AAR
-./gradlew :android-scx:assembleRelease
-
-# Find output at:
-# android-scx/build/outputs/aar/android-scx-release.aar
+# Test shadowing existing release
+./scripts/shadow_existing_release.sh 146
 ```
 
-### 4. Build Architecture
-
-The repository uses a multi-module structure for shadowing:
+### Build Architecture
 
 ```
 webrtc-android-scx/
-├── android-scx/              # Main module (fat-aar)
-│   ├── shadow/              # Shadow submodule
-│   │   ├── libs/            # Extracted classes.jar
-│   │   └── build.gradle     # Shadow plugin config
-│   ├── src/main/jniLibs/    # Native .so files
-│   └── build.gradle         # Fat-aar assembly
-└── build.gradle             # Root config
+├── android-scx/
+│   └── shadow/              # Shadow submodule
+│       ├── libs/            # Extracted classes.jar (workflow)
+│       └── build.gradle     # Shadow plugin config
+├── scripts/
+│   └── shadow_existing_release.sh  # Local testing script
+└── .github/workflows/       # Automated shadowing
 ```
 
-**Shadow Module**: Uses `com.github.johnrengelman.shadow` plugin to relocate all Java bytecode packages.
+### JitPack Distribution (Optional)
 
-**Main Module**: Uses `com.kezong.fat-aar` plugin to embed the shadowed JAR and native libraries into a single AAR.
+JitPack can republish the pre-shadowed AAR as a Maven dependency:
 
-### 3. Verify JitPack Build
+1. User requests version (e.g., `146`)
+2. JitPack downloads pre-shadowed AAR from GitHub release
+3. Publishes to Maven repository
+4. Caches for future requests
 
 Check build status: https://jitpack.io/com/github/smile-cx/webrtc-android-scx/<version>/build.log
 
-Example: https://jitpack.io/com/github/smile-cx/webrtc-android-scx/M144/build.log
+**Note**: JitPack is optional. Users can download AAR directly from GitHub releases for bundling in their SDK (see [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)).
 
 ## Versioning
 
-We use a dual-tagging strategy:
-- **Full version tag**: e.g., `146.7680.0` (unique, immutable, used for GitHub releases)
-- **Milestone tag**: e.g., `146` (mutable, force-updated, used by JitPack)
+We use **milestone-only tags** with full version in release notes:
 
-When a new branch version is built for the same milestone (e.g., 146.7680.1), the milestone tag `146` is force-updated to point to the newer version.
+- **Milestone tag**: `146` (used for releases)
+- **Release notes**: "WebRTC Version: 146.7680.0" (full version info)
+- **Release title**: "M146"
 
-Example:
-- Full version tag: `146.7680.0`
-- Milestone tag: `146` (points to 146.7680.0, updated if 146.7680.1 is released)
-- Release title: `M146`
-- Release notes: "WebRTC Version: 146.7680.0"
-- User dependency: `com.github.smile-cx:webrtc-android-scx:146`
+When a new branch version is available (e.g., 146.7680.1), the workflow:
+1. Detects new branch by parsing release notes
+2. Rebuilds and shadows AAR
+3. Force-updates milestone tag `146` to point to new commit
+4. Updates release with new asset
+
+**Benefits:**
+- Tags remain clean and updatable
+- Full version tracking in release body
+- Pre-shadowed AAR ready for direct use or JitPack
+- Daily automation prevents manual intervention
 
 ## License and Attribution
 

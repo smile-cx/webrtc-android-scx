@@ -68,14 +68,17 @@ Each release includes the full WebRTC version in the release notes (e.g., 146.76
 
 1. **WebRTC Build**: Patches are applied during build to add native (JNI) prefixes
    - Modifies package paths and JNI method names
-   - Outputs: `libscxwebrtc.aar`
+   - Outputs: Base `libscxwebrtc.aar` with JNI prefixes
 
-2. **Distribution Build** (JitPack):
-   - Downloads `libscxwebrtc.aar` from GitHub releases
-   - Extracts `classes.jar` and native libraries
-   - Applies Java package relocation using Shadow Gradle plugin
-   - Repackages with Fat-aar plugin
-   - Publishes to JitPack Maven repository
+2. **Shadowing** (GitHub Workflow):
+   - Extracts `classes.jar` from base AAR
+   - Applies Java package relocation using Shadow Gradle plugin: `org.webrtc.*` → `cx.smile.org.webrtc.*`
+   - Repackages AAR with shadowed classes
+   - Publishes pre-shadowed `libscxwebrtc.aar` to GitHub releases
+
+3. **Distribution** (Optional):
+   - **Direct use**: Download AAR from GitHub releases for bundling in SDKs
+   - **JitPack**: Republishes pre-shadowed AAR as Maven dependency
 
 ### Architecture
 
@@ -83,11 +86,11 @@ Each release includes the full WebRTC version in the release notes (e.g., 146.76
 webrtc-android-scx/
 ├── patches/                    # Patches for native symbol prefixing
 │   └── jni_prefix_smile.patch # JNI package prefix modifications
-├── scripts/                    # Build scripts
-├── android-scx/               # Distribution module (for JitPack)
-│   ├── shadow/                # Shadow submodule for package relocation
-│   └── build.gradle           # Fat-aar assembly
-└── .github/workflows/         # CI/CD for WebRTC builds
+├── scripts/                    # Build and shadowing scripts
+├── android-scx/
+│   └── shadow/                # Shadow submodule for package relocation
+│       └── build.gradle       # Shadow plugin config
+└── .github/workflows/         # CI/CD: WebRTC build + shadowing
 ```
 
 ## Documentation
