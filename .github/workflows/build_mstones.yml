@@ -214,7 +214,12 @@ jobs:
           # Verify shadowing
           echo "Verifying shadowed classes..."
           unzip -q -o libscxwebrtc.aar -d verify/
-          jar -tf verify/classes.jar | grep "cx/smile/org/webrtc" | head -5 || echo "⚠️ Warning: No shadowed classes found"
+          if jar -tf verify/classes.jar | grep -q "cx/smile/org/webrtc"; then
+            echo "✓ Shadowed classes found:"
+            jar -tf verify/classes.jar | grep "cx/smile/org/webrtc" 2>/dev/null | head -5
+          else
+            echo "⚠️ Warning: No shadowed classes found"
+          fi
           rm -rf verify/
 
       - name: Create and push tags
