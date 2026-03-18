@@ -29,8 +29,6 @@ jobs:
         milestone: [137]
 
     steps:
-      - uses: actions/checkout@v4
-
       - name: GH Auth
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} >> token.txt
@@ -126,6 +124,9 @@ jobs:
           sudo rm -rf "/usr/local/share/boost"
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
           df -h
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Checkout WebRTC
         if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true'
