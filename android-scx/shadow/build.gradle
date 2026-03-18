@@ -1,3 +1,9 @@
+// Shadow module for Java package relocation
+// This applies modifications to WebRTC bytecode to prevent symbol collisions.
+// Package relocation: org.webrtc.* → cx.smile.org.webrtc.*
+// This constitutes a modification of the original WebRTC distribution.
+// All modifications documented in: ../../patches/MODIFICATIONS.md and ../../NOTICE
+
 plugins {
     id 'java-library'
     id 'com.github.johnrengelman.shadow' version '8.1.1'

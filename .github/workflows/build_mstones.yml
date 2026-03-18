@@ -1,5 +1,9 @@
 name: OnDemand Release SmileCX WebRTC [137]
 
+# This workflow builds modified WebRTC with SmileCX symbol prefixing.
+# Modifications documented in: patches/MODIFICATIONS.md and NOTICE
+# License compliance: LICENSE.md contains all required license texts
+
 permissions:
   contents: write
 
@@ -79,6 +83,7 @@ jobs:
         run: |
           cd src
           echo "Applying jni_prefix_smile patch with fuzzy matching..."
+          echo "This modifies upstream WebRTC source files - see patches/MODIFICATIONS.md"
 
           # Try git apply first (more forgiving)
           if git apply --check --verbose "${GITHUB_WORKSPACE}/patches/jni_prefix_smile.patch" 2>&1; then

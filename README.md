@@ -103,9 +103,48 @@ See [DISTRIBUTION.md](DISTRIBUTION.md) for:
 - Testing the shadowing process locally
 - JitPack build configuration
 
-## License
+## License and Third-Party Notices
 
-WebRTC is licensed under the BSD 3-Clause License. See [LICENSE](LICENSE) for details.
+This repository contains modified versions of WebRTC and related third-party software components.
+
+### Original WebRTC License
+
+WebRTC is licensed under the BSD 3-Clause License.
+Copyright (c) 2011, The WebRTC project authors. All rights reserved.
+
+### Modifications
+
+This distribution includes WebRTC source code that has been modified by SmileCX. Modifications include:
+
+- **Native (JNI) symbol prefixing**: JNI method names and native library names have been modified to prevent symbol collisions
+- **Java package relocation**: All Java packages have been relocated from `org.webrtc.*` to `cx.smile.org.webrtc.*` using the Gradle Shadow plugin
+- **Build system modifications**: Build scripts and configuration files have been modified to support custom symbol prefixing
+
+All modifications are documented in:
+- Source patches: `patches/jni_prefix_smile.patch`
+- Build scripts: `scripts/`
+- Distribution module: `android-scx/`
+
+Modified files carry changes as documented in the repository history and patch files. This modified distribution should not be confused with the official upstream WebRTC project.
+
+### Third-Party Components
+
+WebRTC includes multiple third-party components under various licenses, including:
+- **BSD 3-Clause**: WebRTC core, libc++, libc++abi, libsrtp, libvpx, libyuv, opus, usrsctp, zlib
+- **Apache 2.0**: abseil-cpp, boringssl, protobuf
+- **MIT and other permissive licenses**: Various components (see LICENSE.md)
+
+Where applicable, this distribution preserves all original copyright notices, license texts, and attribution requirements from upstream components.
+
+### License Files
+
+- **[LICENSE.md](LICENSE.md)**: Complete license texts for WebRTC and all third-party components
+- **[NOTICE](NOTICE)**: Modification notices and attribution information for this distribution
+
+### Upstream References
+
+- Upstream WebRTC: https://webrtc.googlesource.com/src
+- WebRTC License: https://webrtc.googlesource.com/src/+/main/LICENSE
 
 ## References
 

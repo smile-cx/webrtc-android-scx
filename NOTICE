@@ -1,0 +1,72 @@
+SmileCX WebRTC for Android
+
+This distribution contains modified versions of WebRTC and related third-party components.
+
+===============================================================================
+
+MODIFICATIONS
+
+This distribution includes WebRTC source code that has been modified by SmileCX.
+Modifications include:
+
+1. Native (JNI) symbol prefixing:
+   - JNI method names prefixed with package path: Java_cx_smile_org_webrtc_*
+   - Native library renamed: libscxjingle_peerconnection_so.so
+   - Package prefix added to generated JNI headers
+
+2. Java package relocation:
+   - Original packages: org.webrtc.*
+   - Relocated packages: cx.smile.org.webrtc.*
+   - Applied via Gradle Shadow plugin during distribution build
+
+3. Build system modifications:
+   - Modified BUILD.gn files to support custom package prefixes
+   - Modified JNI code generation scripts and templates
+   - Modified build_aar.py to output custom AAR filename
+
+All modifications are documented in the repository:
+- Source patches: patches/jni_prefix_smile.patch
+- Build scripts: scripts/
+- Distribution build: android-scx/
+
+The modifications are designed to prevent symbol collisions when this WebRTC
+library is used alongside other WebRTC implementations in the same application.
+
+===============================================================================
+
+UPSTREAM WEBRTC
+
+WebRTC
+Copyright (c) 2011, The WebRTC project authors. All rights reserved.
+
+WebRTC is licensed under the BSD 3-Clause License.
+See LICENSE.md for the complete WebRTC license and all third-party component licenses.
+
+===============================================================================
+
+APACHE 2.0 LICENSED COMPONENTS
+
+This distribution includes components licensed under the Apache License 2.0:
+- abseil-cpp
+- boringssl
+- protobuf
+
+The Apache License 2.0 requires that modified files carry prominent notices
+stating that files have been changed. The modifications described above apply
+to files throughout the WebRTC codebase, including files in these Apache 2.0
+licensed components where they integrate with the WebRTC JNI layer.
+
+For the full Apache License 2.0 text and copyright notices for these
+components, see LICENSE.md.
+
+===============================================================================
+
+DISTRIBUTION
+
+This modified WebRTC distribution is built and released by SmileCX and should
+not be confused with the official upstream WebRTC project maintained by Google.
+
+Repository: https://github.com/smile-cx/webrtc-android-scx
+Upstream WebRTC: https://webrtc.googlesource.com/src
+
+For the complete text of all applicable licenses, see LICENSE.md in this repository.

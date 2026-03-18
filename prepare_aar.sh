@@ -1,6 +1,11 @@
 #!/bin/bash
 # Prepare AAR for shadowing and repackaging
 # Usage: ./prepare_aar.sh <path-to-libscxwebrtc.aar>
+#
+# This script prepares the patched WebRTC AAR for Java package relocation.
+# The input AAR already contains native symbol modifications (from patches).
+# This script extracts it for Shadow plugin to relocate Java packages.
+# All modifications documented in: patches/MODIFICATIONS.md and NOTICE
 
 set -e
 set -x

@@ -133,6 +133,29 @@ Example:
 - Release notes: "WebRTC Version: 146.7680.0"
 - User dependency: `com.github.smile-cx:webrtc-android-scx:146`
 
+## License and Attribution
+
+This distribution contains modified versions of WebRTC and related third-party components. All original license texts, copyright notices, and attribution requirements are preserved.
+
+### Key Documentation
+
+- **[LICENSE.md](LICENSE.md)**: Complete license texts for WebRTC and all third-party components
+- **[NOTICE](NOTICE)**: Modification notices and attribution information
+- **[patches/MODIFICATIONS.md](patches/MODIFICATIONS.md)**: Detailed documentation of all source code modifications
+
+### Compliance Notes
+
+This modified distribution satisfies the requirements of:
+- BSD 3-Clause License (WebRTC): Copyright notices and license text preserved
+- Apache 2.0 License (abseil-cpp, boringssl, protobuf): Modification notices documented, original licenses preserved
+- Other component licenses: All notices and license texts preserved in LICENSE.md
+
+The build process applies modifications via patch files and Gradle plugins. All modifications are documented and traceable via:
+- Patch files in `patches/` directory
+- Build scripts in `scripts/` directory
+- Repository commit history
+- NOTICE file and MODIFICATIONS.md documentation
+
 ## Troubleshooting
 
 ### JitPack build failed
