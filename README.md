@@ -93,18 +93,13 @@ webrtc-android-scx/
 └── .github/workflows/         # CI/CD: WebRTC build + shadowing
 ```
 
-## Documentation
+## Build Process
 
-- **[DISTRIBUTION.md](DISTRIBUTION.md)**: Complete guide for users and maintainers
-- **[SHADOWING.md](SHADOWING.md)**: Technical details of the shadowing implementation
-- **[BUILD_REPLICATION_PLAN.md](BUILD_REPLICATION_PLAN.md)**: How to replicate the build system
-
-## For Maintainers
-
-See [DISTRIBUTION.md](DISTRIBUTION.md) for:
-- Publishing new releases
-- Testing the shadowing process locally
-- JitPack build configuration
+Automated via GitHub Actions:
+- Daily checks for new WebRTC stable milestones
+- Builds AAR with JNI prefix + Java package shadowing
+- Creates GitHub releases with pre-shadowed AAR, LICENSE.md, and NOTICE
+- Milestone tags (e.g., `146`) for version tracking
 
 ## License and Third-Party Notices
 
