@@ -109,10 +109,46 @@ jobs:
           cd src
           source "${GITHUB_WORKSPACE}/scripts/build_webrtc.sh" 
 
-      - name: Create SDK
+      - name: Create SDK (base AAR)
         if: env.should_build == 'true'
         run: |
           mv ./src/libscxwebrtc.aar .
+
+      - name: Apply shadowing to AAR
+        if: env.should_build == 'true'
+        run: |
+          echo "Shadowing WebRTC classes in AAR..."
+
+          # Extract base AAR
+          mkdir -p aar-extract
+          unzip -q libscxwebrtc.aar -d aar-extract/
+
+          # Prepare shadow module
+          rm -rf android-scx/shadow/libs/*
+          mkdir -p android-scx/shadow/libs
+          cp aar-extract/classes.jar android-scx/shadow/libs/
+
+          # Run shadow JAR creation
+          ./gradlew :android-scx:shadow:shadowJar -PVERSION_NAME=${{ env.next_release_tag }}
+
+          # Replace classes.jar with shadowed version
+          cp android-scx/shadow/build/libs/webrtc-shadowed.jar aar-extract/classes.jar
+
+          # Repackage AAR with shadowed classes
+          cd aar-extract
+          zip -q -r ../libscxwebrtc-shadowed.aar *
+          cd ..
+
+          # Replace original AAR with shadowed version
+          mv libscxwebrtc-shadowed.aar libscxwebrtc.aar
+
+          echo "✓ Shadowed AAR created"
+
+          # Verify shadowing
+          echo "Verifying shadowed classes..."
+          unzip -q -o libscxwebrtc.aar -d verify/
+          jar -tf verify/classes.jar | grep "cx/smile/org/webrtc" | head -5 || echo "⚠️ Warning: No shadowed classes found"
+          rm -rf verify/
 
       - name: Create and push tags
         if: env.should_build == 'true'
@@ -134,9 +170,11 @@ jobs:
           echo "WebRTC Branch: [branch-heads/${{ env.next_release_branch }}](https://chromium.googlesource.com/external/webrtc/+log/branch-heads/${{ env.next_release_branch }})" >> changelog.md
           gh release create "${{ env.next_release_tag }}" -t "M${{ env.next_release_milestone }}"  -F changelog.md "libscxwebrtc.aar"
 
-      - name: Trigger JitPack build
-        if: env.should_build == 'true'
-        run: |
-          echo "Triggering JitPack build for version ${{ env.next_release_tag }}"
-          curl -s "https://jitpack.io/api/builds/com.github.smile-cx/webrtc-android-scx/${{ env.next_release_tag }}"
-          echo "JitPack build triggered. Check status at: https://jitpack.io/com/github/smile-cx/webrtc-android-scx/${{ env.next_release_tag }}/build.log"
+      # Optional: Trigger JitPack to republish the already-shadowed AAR
+      # You can disable this if you only need the GitHub release artifact
+      # - name: Trigger JitPack build
+      #   if: env.should_build == 'true'
+      #   run: |
+      #     echo "Triggering JitPack build for version ${{ env.next_release_tag }}"
+      #     curl -s "https://jitpack.io/api/builds/com.github.smile-cx/webrtc-android-scx/${{ env.next_release_tag }}"
+      #     echo "JitPack build triggered. Check status at: https://jitpack.io/com/github/smile-cx/webrtc-android-scx/${{ env.next_release_tag }}/build.log"
