@@ -8,9 +8,19 @@ before_install:
 install:
   - echo "Downloading and preparing AAR from GitHub releases..."
   - |
-    # Extract version from git tag
-    VERSION=${JITPACK_GIT_TAG:-${JITPACK_VERSION}}
+    # Extract version from git tag or commit
+    # JitPack sets various environment variables depending on how it's triggered
+    VERSION=${JITPACK_GIT_TAG:-${JITPACK_VERSION:-${JITPACK_COMMIT}}}
+
+    # If still empty, try to get from git
+    if [ -z "$VERSION" ]; then
+      VERSION=$(git describe --tags --exact-match 2>/dev/null || git rev-parse --short HEAD)
+    fi
+
     echo "Building version: $VERSION"
+
+    # Debug: show all JITPACK_ variables
+    env | grep JITPACK || true
 
     # Download AAR from GitHub release
     wget "https://github.com/smile-cx/webrtc-android-scx/releases/download/${VERSION}/libscxwebrtc.aar" -O libscxwebrtc.aar || {

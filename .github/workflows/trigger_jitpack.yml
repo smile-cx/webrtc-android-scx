@@ -1,0 +1,40 @@
+name: Trigger JitPack Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version/tag to trigger (e.g., 146)'
+        required: true
+        type: string
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger JitPack build
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          echo "Triggering JitPack build for version: $VERSION"
+
+          # Trigger JitPack to build this version
+          curl -s "https://jitpack.io/api/builds/com.github.smile-cx/webrtc-android-scx/$VERSION" \
+            -o /tmp/jitpack_response.json
+
+          echo "JitPack response:"
+          cat /tmp/jitpack_response.json
+
+          echo ""
+          echo "Check build status at:"
+          echo "https://jitpack.io/com/github/smile-cx/webrtc-android-scx/$VERSION/build.log"
+
+      - name: Wait and check status
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          echo "Waiting 30 seconds for build to start..."
+          sleep 30
+
+          echo "Fetching build status..."
+          curl -s "https://jitpack.io/api/builds/com.github.smile-cx/webrtc-android-scx/$VERSION" \
+            | python3 -m json.tool || echo "Status not available yet"
