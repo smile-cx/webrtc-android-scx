@@ -54,21 +54,8 @@ index 950190ece0..0a3ea02653 100644
 -  extern "C" JNIEXPORT rettype JNICALL Java_org_webrtc_##name(__VA_ARGS__)
 +  extern "C" JNIEXPORT rettype JNICALL Java_cx_smile_org_webrtc_##name(__VA_ARGS__)
  #endif
- 
+
  namespace webrtc {
-diff --git a/tools_webrtc/android/build_aar.py b/tools_webrtc/android/build_aar.py
-index 2fbce97c60..130b3d5fa7 100755
---- a/tools_webrtc/android/build_aar.py
-+++ b/tools_webrtc/android/build_aar.py
-@@ -254,7 +254,7 @@ def BuildAar(build_dir,
-             Collect(aar_file, build_dir, arch, unstripped)
- 
-     license_dir = os.path.dirname(os.path.realpath(output_file))
--    GenerateLicenses(license_dir, build_dir, archs)
-+    #GenerateLicenses(license_dir, build_dir, archs)
- 
- 
- def main():
 diff --git a/webrtc.gni b/webrtc.gni
 index 6eb16cf188..dc7434bd34 100644
 --- a/webrtc.gni

@@ -33,13 +33,7 @@ These modifications add symbol prefixing to prevent naming collisions when this 
 
 ### 3. Build Script Modifications
 
-**Modified Files:**
-- `tools_webrtc/android/build_aar.py` - Commented out automatic license generation
-
-**Changes:**
-- Line 323-324: Commented out `GenerateLicenses(license_dir, build_dir, archs)` call
-- License information is instead maintained in the repository root (LICENSE.md, NOTICE)
-- This ensures consistent licensing documentation across all distribution channels
+No additional build script modifications beyond the source code changes above. The WebRTC build system's automatic license generation (`GenerateLicenses`) remains enabled and generates comprehensive license documentation during the AAR build process.
 
 ## Application Method
 
