@@ -1,6 +1,5 @@
 plugins {
     id 'com.android.library'
-    id 'com.kezong.fat-aar'
     id 'maven-publish'
 }
 
@@ -23,26 +22,65 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    afterEvaluate {
-        generateReleaseBuildConfig.enabled = false
-        generateDebugBuildConfig.enabled = false
-        generateReleaseResValues.enabled = false
-        generateDebugResValues.enabled = false
+    buildFeatures {
+        buildConfig = false
+        resValues = false
     }
-}
-
-dependencies {
-    compileOnly project(path: ':android-scx:shadow', configuration: 'shadow')
-    embed project(path: ':android-scx:shadow', configuration: 'shadow')
 }
 
 def POM_ARTIFACT_ID = "webrtc-android"
 
 afterEvaluate {
+    // Task to embed shadowed JAR classes into the AAR
+    task embedShadowClasses {
+        dependsOn ':android-scx:shadow:shadowJar', 'bundleReleaseAar'
+
+        doLast {
+            def shadowJar = project(':android-scx:shadow').tasks.shadowJar.archiveFile.get().asFile
+            def aarFile = file("${buildDir}/outputs/aar/android-scx-release.aar")
+
+            if (!aarFile.exists()) {
+                throw new GradleException("AAR file not found: ${aarFile}")
+            }
+
+            println "Embedding shadowed classes from: ${shadowJar}"
+            println "Into AAR: ${aarFile}"
+
+            // Extract AAR
+            def tmpDir = file("${buildDir}/tmp/aar-repack")
+            tmpDir.deleteDir()
+            tmpDir.mkdirs()
+
+            copy {
+                from zipTree(aarFile)
+                into tmpDir
+            }
+
+            // Replace classes.jar with shadowed JAR
+            def classesJar = new File(tmpDir, 'classes.jar')
+            classesJar.delete()
+            copy {
+                from shadowJar
+                into tmpDir
+                rename { 'classes.jar' }
+            }
+
+            // Repackage AAR
+            ant.zip(destfile: aarFile, basedir: tmpDir)
+
+            println "✓ Shadowed classes embedded into AAR"
+        }
+    }
+
+    // Hook embedShadowClasses after bundleReleaseAar
+    tasks.named('bundleReleaseAar').configure {
+        finalizedBy embedShadowClasses
+    }
+
     publishing {
         publications {
-            androidScx(MavenPublication) {
-                from components.release
+            release(MavenPublication) {
+                artifact(bundleReleaseAar)
 
                 groupId = 'cx.smile'
                 artifactId = POM_ARTIFACT_ID

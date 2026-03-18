@@ -15,19 +15,37 @@ java {
 }
 
 dependencies {
-    api files("libs/classes.jar")
+    implementation files("libs/classes.jar")
 }
 
 shadowJar {
     // Relocate all packages to cx.smile prefix
     relocate 'org.webrtc', 'cx.smile.org.webrtc'
+
+    // Output configuration
+    archiveClassifier.set('')
+    archiveBaseName.set('webrtc-shadowed')
+
+    // Include the classes.jar file directly
+    from(zipTree(file('libs/classes.jar')))
+
+    // Exclude signature files that would be invalid after shadowing
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
 }
 
-import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
-
-task relocateShadowJar(type: ConfigureShadowRelocation) {
-    target = tasks.shadowJar
-    prefix = "cx.smile"
+// Make shadowJar the default artifact
+artifacts {
+    archives shadowJar
 }
 
-tasks.shadowJar.dependsOn tasks.relocateShadowJar
+configurations {
+    shadow {
+        extendsFrom implementation
+    }
+}
+
+// Disable regular JAR task, use shadowJar instead
+tasks.jar.enabled = false
+tasks.build.dependsOn tasks.shadowJar
