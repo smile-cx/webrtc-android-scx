@@ -122,14 +122,10 @@ jobs:
           git config --local user.email "${{ github.actor }}[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
-          # Create full version tag (for tracking only)
-          git tag "${{ env.next_full_version }}"
-
-          # Create/update milestone tag (force to allow updates) - this is where release will be
+          # Create/update milestone tag (force to allow updates)
           git tag -f "${{ env.next_release_tag }}"
 
-          # Push both tags (force for milestone tag)
-          git push origin "${{ env.next_full_version }}"
+          # Push milestone tag
           git push -f origin "${{ env.next_release_tag }}"
 
       - name: Create prerelease
