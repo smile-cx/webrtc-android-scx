@@ -69,9 +69,12 @@ jobs:
           echo "next_release_tag=${{ env.next_release_milestone }}" >> $GITHUB_ENV
           echo "next_full_version=${{ env.next_release_milestone }}.${{ env.next_release_branch }}.0" >> $GITHUB_ENV
 
-      - name: Check if release exists and has AAR
+      - name: Check if release exists and needs update
         id: check_release
         run: |
+          # For on-demand builds, we can optionally reuse existing AAR
+          # This allows re-running the workflow just to apply shadowing
+
           # Check if release exists
           if gh release view "${{ env.next_release_tag }}" > /dev/null 2>&1; then
             echo "Release ${{ env.next_release_tag }} already exists"
@@ -84,13 +87,13 @@ jobs:
               # Check if already shadowed
               unzip -q libscxwebrtc.aar -d check/
               if jar -tf check/classes.jar | grep -q "cx/smile/org/webrtc"; then
-                echo "✓ AAR is already shadowed - no rebuild needed"
+                echo "✓ AAR is already shadowed - will skip shadowing"
                 echo "already_shadowed=true" >> $GITHUB_OUTPUT
-                echo "should_build=false" >> $GITHUB_ENV
+                # Don't set should_build=false here - let it rebuild if that's what's requested
               else
-                echo "AAR exists but not shadowed - will apply shadowing"
+                echo "AAR exists but not shadowed - will apply shadowing only"
                 echo "already_shadowed=false" >> $GITHUB_OUTPUT
-                echo "should_build=false" >> $GITHUB_ENV
+                echo "should_build=false" >> $GITHUB_ENV  # Skip rebuild, just shadow
               fi
               rm -rf check/
             else
