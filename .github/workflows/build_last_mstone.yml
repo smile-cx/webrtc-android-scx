@@ -50,12 +50,32 @@ jobs:
           gh auth login --with-token < token.txt
           rm token.txt          
       
-      - name: Getting WebRTC release        
+      - name: Getting WebRTC release
         run: |
-          IFS=$'.' current_release_tag=($(gh api repos/${{ github.repository }}/releases | jq -r ".[0].tag_name"))          
-          milestones=$( curl -sL "https://chromiumdash.appspot.com/fetch_milestones" | jq -r 'map(select(.schedule_phase | . != null) | select(.schedule_phase=="stable" or .schedule_phase=="stable_cut"))' )         
-          echo "current_release_milestone=${current_release_tag[0]:-0}" >> $GITHUB_ENV
-          echo "current_release_branch=${current_release_tag[1]:-0}" >> $GITHUB_ENV
+          # Get latest release info
+          LATEST_RELEASE=$(gh api repos/${{ github.repository }}/releases | jq -r '.[0]')
+          LATEST_TAG=$(echo "$LATEST_RELEASE" | jq -r '.tag_name')
+          LATEST_BODY=$(echo "$LATEST_RELEASE" | jq -r '.body')
+
+          # Extract milestone from tag (e.g., "146" from tag "146")
+          current_release_milestone=$LATEST_TAG
+
+          # Extract branch from release notes (e.g., "7680" from "WebRTC Version: 146.7680.0")
+          if echo "$LATEST_BODY" | grep -q "WebRTC Version:"; then
+            FULL_VERSION=$(echo "$LATEST_BODY" | grep "WebRTC Version:" | head -1 | sed 's/.*WebRTC Version: //' | tr -d ' ')
+            IFS='.' read -ra VERSION_PARTS <<< "$FULL_VERSION"
+            current_release_branch=${VERSION_PARTS[1]:-0}
+            echo "Found current release: M$current_release_milestone (branch $current_release_branch)"
+          else
+            echo "⚠️ Could not parse branch from release notes, assuming 0"
+            current_release_branch=0
+          fi
+
+          # Get next stable milestone
+          milestones=$( curl -sL "https://chromiumdash.appspot.com/fetch_milestones" | jq -r 'map(select(.schedule_phase | . != null) | select(.schedule_phase=="stable" or .schedule_phase=="stable_cut"))' )
+
+          echo "current_release_milestone=$current_release_milestone" >> $GITHUB_ENV
+          echo "current_release_branch=$current_release_branch" >> $GITHUB_ENV
           echo "next_release_milestone=$(echo $milestones  | jq -r ".[0].milestone")" >> $GITHUB_ENV
           echo "next_release_branch=$(echo $milestones  | jq -r ".[0].webrtc_branch")" >> $GITHUB_ENV
           
