@@ -148,7 +148,7 @@ We use **milestone-only tags** with full version in release notes:
 
 - **Milestone tag**: `146` (used for releases)
 - **Release notes**: "WebRTC Version: 146.7680.0" (full version info)
-- **Release title**: "M146"
+- **Release title**: "146"
 
 When a new branch version is available (e.g., 146.7680.1), the workflow:
 1. Detects new branch by parsing release notes
