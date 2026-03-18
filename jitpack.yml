@@ -1,61 +1,47 @@
 # JitPack configuration
+# Note: The AAR from GitHub releases is already shadowed by the workflow.
+# JitPack just republishes it as a Maven artifact.
+
 jdk:
   - openjdk17
 
 before_install:
-  - echo "JitPack build configuration"
+  - echo "JitPack republishing pre-shadowed AAR"
 
 install:
-  - echo "Downloading and preparing AAR from GitHub releases..."
+  - echo "Downloading pre-shadowed AAR from GitHub releases..."
   - |
-    # Extract version from git tag or commit
-    # JitPack sets various environment variables depending on how it's triggered
+    # Extract version from git tag
     VERSION=${JITPACK_GIT_TAG:-${JITPACK_VERSION:-${JITPACK_COMMIT}}}
-
-    # If still empty, try to get from git
     if [ -z "$VERSION" ]; then
       VERSION=$(git describe --tags --exact-match 2>/dev/null || git rev-parse --short HEAD)
     fi
 
-    echo "Building version: $VERSION"
+    echo "Publishing version: $VERSION"
 
-    # Debug: show all JITPACK_ variables
-    env | grep JITPACK || true
-
-    # Download AAR from GitHub release
+    # Download pre-shadowed AAR from GitHub release
     wget "https://github.com/smile-cx/webrtc-android-scx/releases/download/${VERSION}/libscxwebrtc.aar" -O libscxwebrtc.aar || {
       echo "Failed to download AAR for version ${VERSION}"
       exit 1
     }
 
-    # Extract AAR contents
-    echo "Extracting AAR..."
+    # Extract AAR contents (already shadowed)
+    echo "Extracting pre-shadowed AAR..."
     unzip -o libscxwebrtc.aar -d extracted/
 
-    # Prepare shadow module - copy classes.jar
-    echo "Preparing shadow module..."
-    rm -rf android-scx/shadow/libs/*
+    # Copy to module structure for republishing
     mkdir -p android-scx/shadow/libs
     cp extracted/classes.jar android-scx/shadow/libs/
 
-    # Copy native libraries to main module
-    echo "Copying native libraries..."
-    rm -rf android-scx/src/main/jniLibs/*
     mkdir -p android-scx/src/main/jniLibs
     cp -r extracted/jni/* android-scx/src/main/jniLibs/
 
-    # Rename .so files to match shadowed package
-    # libjingle_peerconnection_so.so -> libscxjingle_peerconnection_so.so
-    find android-scx/src/main/jniLibs/ -type f \
-      -name "libscxjingle_peerconnection_so.so" \
-      -exec echo "Native library already has correct name: {}" \;
-
-    # Clean up extracted files
     rm -rf extracted/
 
-    # Build and publish shadowed AAR
-    echo "Building shadowed AAR..."
-    ./gradlew :android-scx:assembleRelease -PVERSION_NAME=${VERSION}
+    # Verify it's already shadowed
+    echo "Verifying shadowed classes..."
+    jar -tf android-scx/shadow/libs/classes.jar | grep "cx/smile/org/webrtc" | head -3 || echo "⚠️ Warning: Not shadowed"
 
-    echo "Publishing to local Maven..."
-    ./gradlew :android-scx:publishToMavenLocal -PVERSION_NAME=${VERSION}
+    # Publish to Maven
+    echo "Publishing to Maven..."
+    ./gradlew :android-scx:assembleRelease :android-scx:publishToMavenLocal -PVERSION_NAME=${VERSION}
