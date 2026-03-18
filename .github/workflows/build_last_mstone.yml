@@ -64,11 +64,43 @@ jobs:
           echo "should_build=${{ env.next_release_branch > env.current_release_branch }}" >> $GITHUB_ENV
           echo "next_release_name=M${{ env.next_release_milestone }}" >> $GITHUB_ENV
           echo "next_release_tag=${{ env.next_release_milestone }}" >> $GITHUB_ENV
-          echo "next_full_version=${{ env.next_release_milestone }}.${{ env.next_release_branch }}.0" >> $GITHUB_ENV    
-          
+          echo "next_full_version=${{ env.next_release_milestone }}.${{ env.next_release_branch }}.0" >> $GITHUB_ENV
+
+      - name: Check if release exists and has AAR
+        id: check_release
+        run: |
+          # Check if release exists
+          if gh release view "${{ env.next_release_tag }}" > /dev/null 2>&1; then
+            echo "Release ${{ env.next_release_tag }} already exists"
+
+            # Try to download existing AAR
+            if gh release download "${{ env.next_release_tag }}" -p "libscxwebrtc.aar" --clobber 2>/dev/null; then
+              echo "✓ Found existing AAR in release"
+              echo "has_existing_aar=true" >> $GITHUB_OUTPUT
+
+              # Check if already shadowed
+              unzip -q libscxwebrtc.aar -d check/
+              if jar -tf check/classes.jar | grep -q "cx/smile/org/webrtc"; then
+                echo "✓ AAR is already shadowed - no rebuild needed"
+                echo "already_shadowed=true" >> $GITHUB_OUTPUT
+                echo "should_build=false" >> $GITHUB_ENV
+              else
+                echo "AAR exists but not shadowed - will apply shadowing"
+                echo "already_shadowed=false" >> $GITHUB_OUTPUT
+                echo "should_build=false" >> $GITHUB_ENV
+              fi
+              rm -rf check/
+            else
+              echo "Release exists but no AAR found - will build from scratch"
+              echo "has_existing_aar=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "Release does not exist - will build from scratch"
+            echo "has_existing_aar=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Checkout WebRTC
-        if: env.should_build == 'true'
+        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true'
         run: |
           source "${GITHUB_WORKSPACE}/scripts/checkout_webrtc.sh";
           echo "${PATH}" >> $GITHUB_PATH
@@ -77,7 +109,7 @@ jobs:
           WEBRTC_BRANCH: ${{ env.next_release_branch  }}
 
       - name: Apply SmileCX patches
-        if: env.should_build == 'true'
+        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true'
         run: |
           cd src
           echo "Applying jni_prefix_smile patch with fuzzy matching..."
@@ -104,18 +136,18 @@ jobs:
           grep -q "Java_cx_smile_org_webrtc" sdk/android/src/jni/jni_helpers.h && echo "✓ JNI helpers updated" || echo "✗ JNI helpers NOT updated"
 
       - name: Build WebRTC
-        if: env.should_build == 'true'
+        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true'
         run: |
           cd src
-          source "${GITHUB_WORKSPACE}/scripts/build_webrtc.sh" 
+          source "${GITHUB_WORKSPACE}/scripts/build_webrtc.sh"
 
       - name: Create SDK (base AAR)
-        if: env.should_build == 'true'
+        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true'
         run: |
           mv ./src/libscxwebrtc.aar .
 
       - name: Apply shadowing to AAR
-        if: env.should_build == 'true'
+        if: (env.should_build == 'true' || steps.check_release.outputs.has_existing_aar == 'true') && steps.check_release.outputs.already_shadowed != 'true'
         run: |
           echo "Shadowing WebRTC classes in AAR..."
 
@@ -151,7 +183,7 @@ jobs:
           rm -rf verify/
 
       - name: Create and push tags
-        if: env.should_build == 'true'
+        if: env.should_build == 'true' || steps.check_release.outputs.has_existing_aar == 'true'
         run: |
           git config --local user.email "${{ github.actor }}[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
@@ -162,13 +194,23 @@ jobs:
           # Push milestone tag
           git push -f origin "${{ env.next_release_tag }}"
 
-      - name: Create prerelease
-        if: env.should_build == 'true'
+      - name: Create or update release
+        if: (env.should_build == 'true' || steps.check_release.outputs.has_existing_aar == 'true') && steps.check_release.outputs.already_shadowed != 'true'
         run: |
           echo "WebRTC Version: ${{ env.next_full_version }}" >> changelog.md
           echo "" >> changelog.md
           echo "WebRTC Branch: [branch-heads/${{ env.next_release_branch }}](https://chromium.googlesource.com/external/webrtc/+log/branch-heads/${{ env.next_release_branch }})" >> changelog.md
-          gh release create "${{ env.next_release_tag }}" -t "M${{ env.next_release_milestone }}"  -F changelog.md "libscxwebrtc.aar"
+
+          # Check if release exists
+          if gh release view "${{ env.next_release_tag }}" > /dev/null 2>&1; then
+            echo "Updating existing release with shadowed AAR..."
+            gh release upload "${{ env.next_release_tag }}" libscxwebrtc.aar --clobber
+            echo "✓ Release updated"
+          else
+            echo "Creating new release..."
+            gh release create "${{ env.next_release_tag }}" -t "M${{ env.next_release_milestone }}" -F changelog.md "libscxwebrtc.aar"
+            echo "✓ Release created"
+          fi
 
       # Optional: Trigger JitPack to republish the already-shadowed AAR
       # You can disable this if you only need the GitHub release artifact
