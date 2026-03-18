@@ -244,11 +244,11 @@ jobs:
           # Check if release exists
           if gh release view "${{ env.next_release_tag }}" > /dev/null 2>&1; then
             echo "Updating existing release with new build..."
-            gh release upload "${{ env.next_release_tag }}" libscxwebrtc.aar --clobber
+            gh release upload "${{ env.next_release_tag }}" libscxwebrtc.aar LICENSE.md NOTICE --clobber
             echo "✓ Release updated"
           else
             echo "Creating new release..."
-            gh release create "${{ env.next_release_tag }}" -t "${{ env.next_release_milestone }}" -F changelog.md "libscxwebrtc.aar"
+            gh release create "${{ env.next_release_tag }}" -t "${{ env.next_release_milestone }}" -F changelog.md "libscxwebrtc.aar" LICENSE.md NOTICE
             echo "✓ Release created"
           fi
 
