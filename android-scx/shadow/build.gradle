@@ -19,6 +19,10 @@ dependencies {
 }
 
 shadowJar {
+    // classes.jar is included via both the implementation dependency and the
+    // zipTree below; drop colliding entries instead of failing the build.
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
     // Relocate all packages to cx.smile prefix
     relocate 'org.webrtc', 'cx.smile.org.webrtc'
 
