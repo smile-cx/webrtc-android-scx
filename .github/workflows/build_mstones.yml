@@ -177,62 +177,62 @@ jobs:
           if [ -f LICENSE.md ]; then
             echo "Converting LICENSE.md to LICENSE, decoding HTML entities, and removing markdown..."
             python3 << 'PYEOF'
-import html
-import re
+          import html
+          import re
 
-with open('LICENSE.md', 'r', encoding='utf-8') as f:
-    content = f.read()
+          with open('LICENSE.md', 'r', encoding='utf-8') as f:
+              content = f.read()
 
-# Decode HTML entities
-content = html.unescape(content)
+          # Decode HTML entities
+          content = html.unescape(content)
 
-# Convert markdown headers to plain text with separator lines
-# Replace "# Library Name" with "Library Name\n============"
-content = re.sub(r'^# (.+)$', r'\1\n' + '='*60, content, flags=re.MULTILINE)
+          # Convert markdown headers to plain text with separator lines
+          # Replace "# Library Name" with "Library Name\n============"
+          content = re.sub(r'^# (.+)$', r'\1\n' + '='*60, content, flags=re.MULTILINE)
 
-# Remove code fences
-content = content.replace('```', '')
+          # Remove code fences
+          content = content.replace('```', '')
 
-# Clean up excessive blank lines
-content = re.sub(r'\n{4,}', '\n\n\n', content)
+          # Clean up excessive blank lines
+          content = re.sub(r'\n{4,}', '\n\n\n', content)
 
-# Strip leading/trailing whitespace
-content = content.strip()
+          # Strip leading/trailing whitespace
+          content = content.strip()
 
-with open('LICENSE', 'w', encoding='utf-8') as f:
-    f.write(content)
+          with open('LICENSE', 'w', encoding='utf-8') as f:
+              f.write(content)
 
-print("✓ LICENSE file processed: HTML entities decoded, markdown removed, library names preserved")
-PYEOF
+          print("✓ LICENSE file processed: HTML entities decoded, markdown removed, library names preserved")
+          PYEOF
             rm LICENSE.md
           elif [ -f LICENSE ]; then
             echo "Processing existing LICENSE file..."
             python3 << 'PYEOF'
-import html
-import re
+          import html
+          import re
 
-with open('LICENSE', 'r', encoding='utf-8') as f:
-    content = f.read()
+          with open('LICENSE', 'r', encoding='utf-8') as f:
+              content = f.read()
 
-# Decode HTML entities
-content = html.unescape(content)
+          # Decode HTML entities
+          content = html.unescape(content)
 
-# Convert markdown headers to plain text
-content = re.sub(r'^# (.+)$', r'\1\n' + '='*60, content, flags=re.MULTILINE)
+          # Convert markdown headers to plain text
+          content = re.sub(r'^# (.+)$', r'\1\n' + '='*60, content, flags=re.MULTILINE)
 
-# Remove code fences
-content = content.replace('```', '')
+          # Remove code fences
+          content = content.replace('```', '')
 
-# Clean up excessive blank lines
-content = re.sub(r'\n{4,}', '\n\n\n', content)
+          # Clean up excessive blank lines
+          content = re.sub(r'\n{4,}', '\n\n\n', content)
 
-content = content.strip()
+          content = content.strip()
 
-with open('LICENSE', 'w', encoding='utf-8') as f:
-    f.write(content)
+          with open('LICENSE', 'w', encoding='utf-8') as f:
+              f.write(content)
 
-print("✓ LICENSE file processed: HTML entities decoded, markdown removed, library names preserved")
-PYEOF
+          print("✓ LICENSE file processed: HTML entities decoded, markdown removed, library names preserved")
+          PYEOF
           else
             echo "⚠️ No LICENSE file found"
           fi
