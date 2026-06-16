@@ -40,7 +40,7 @@ WebRTC
 Copyright (c) 2011, The WebRTC project authors. All rights reserved.
 
 WebRTC is licensed under the BSD 3-Clause License.
-See LICENSE.md for the complete WebRTC license and all third-party component licenses.
+See LICENSE for the complete WebRTC license and all third-party component licenses.
 
 ===============================================================================
 
@@ -57,7 +57,7 @@ to files throughout the WebRTC codebase, including files in these Apache 2.0
 licensed components where they integrate with the WebRTC JNI layer.
 
 For the full Apache License 2.0 text and copyright notices for these
-components, see LICENSE.md.
+components, see LICENSE.
 
 ===============================================================================
 
@@ -69,4 +69,4 @@ not be confused with the official upstream WebRTC project maintained by Google.
 Repository: https://github.com/smile-cx/webrtc-android-scx
 Upstream WebRTC: https://webrtc.googlesource.com/src
 
-For the complete text of all applicable licenses, see LICENSE.md in this repository.
+For the complete text of all applicable licenses, see LICENSE in this repository.

@@ -98,7 +98,7 @@ webrtc-android-scx/
 Automated via GitHub Actions:
 - Daily checks for new WebRTC stable milestones
 - Builds AAR with JNI prefix + Java package shadowing
-- Creates GitHub releases with pre-shadowed AAR, LICENSE.md, and NOTICE
+- Creates GitHub releases with pre-shadowed AAR, LICENSE, and NOTICE
 - Milestone tags (e.g., `146`) for version tracking
 
 ## License and Third-Party Notices
@@ -130,13 +130,13 @@ Modified files carry changes as documented in the repository history and patch f
 WebRTC includes multiple third-party components under various licenses, including:
 - **BSD 3-Clause**: WebRTC core, libc++, libc++abi, libsrtp, libvpx, libyuv, opus, usrsctp, zlib
 - **Apache 2.0**: abseil-cpp, boringssl, protobuf
-- **MIT and other permissive licenses**: Various components (see LICENSE.md)
+- **MIT and other permissive licenses**: Various components (see LICENSE)
 
 Where applicable, this distribution preserves all original copyright notices, license texts, and attribution requirements from upstream components.
 
 ### License Files
 
-- **[LICENSE.md](LICENSE.md)**: Complete license texts for WebRTC and all third-party components
+- **[LICENSE](LICENSE)**: Complete license texts for WebRTC and all third-party components
 - **[NOTICE](NOTICE)**: Modification notices and attribution information for this distribution
 
 ### Upstream References

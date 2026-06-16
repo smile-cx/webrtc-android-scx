@@ -2,7 +2,7 @@ name: Release last SmileCX WebRTC milestone
 
 # This workflow builds modified WebRTC with SmileCX symbol prefixing.
 # Modifications documented in: patches/MODIFICATIONS.md and NOTICE
-# License compliance: LICENSE.md contains all required license texts
+# License compliance: LICENSE contains all required license texts
 
 permissions:
   contents: write
@@ -173,10 +173,78 @@ jobs:
           cd src
           source "${GITHUB_WORKSPACE}/scripts/build_webrtc.sh"
 
+      - name: Post-process LICENSE file
+        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true'
+        run: |
+          cd src
+          if [ -f LICENSE.md ]; then
+            echo "Converting LICENSE.md to LICENSE, decoding HTML entities, and removing markdown..."
+            python3 << 'PYEOF'
+import html
+import re
+
+with open('LICENSE.md', 'r', encoding='utf-8') as f:
+    content = f.read()
+
+# Decode HTML entities
+content = html.unescape(content)
+
+# Convert markdown headers to plain text with separator lines
+# Replace "# Library Name" with "Library Name\n============"
+content = re.sub(r'^# (.+)$', r'\1\n' + '='*60, content, flags=re.MULTILINE)
+
+# Remove code fences
+content = content.replace('```', '')
+
+# Clean up excessive blank lines
+content = re.sub(r'\n{4,}', '\n\n\n', content)
+
+# Strip leading/trailing whitespace
+content = content.strip()
+
+with open('LICENSE', 'w', encoding='utf-8') as f:
+    f.write(content)
+
+print("✓ LICENSE file processed: HTML entities decoded, markdown removed, library names preserved")
+PYEOF
+            rm LICENSE.md
+          elif [ -f LICENSE ]; then
+            echo "Processing existing LICENSE file..."
+            python3 << 'PYEOF'
+import html
+import re
+
+with open('LICENSE', 'r', encoding='utf-8') as f:
+    content = f.read()
+
+# Decode HTML entities
+content = html.unescape(content)
+
+# Convert markdown headers to plain text
+content = re.sub(r'^# (.+)$', r'\1\n' + '='*60, content, flags=re.MULTILINE)
+
+# Remove code fences
+content = content.replace('```', '')
+
+# Clean up excessive blank lines
+content = re.sub(r'\n{4,}', '\n\n\n', content)
+
+content = content.strip()
+
+with open('LICENSE', 'w', encoding='utf-8') as f:
+    f.write(content)
+
+print("✓ LICENSE file processed: HTML entities decoded, markdown removed, library names preserved")
+PYEOF
+          else
+            echo "⚠️ No LICENSE file found"
+          fi
+
       - name: Create SDK (base AAR)
         if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true'
         run: |
           mv ./src/libscxwebrtc.aar .
+          mv ./src/LICENSE .
 
       - name: Set up JDK 17 for shadowing
         if: (env.should_build == 'true' || steps.check_release.outputs.has_existing_aar == 'true') && steps.check_release.outputs.already_shadowed != 'true'
@@ -248,11 +316,11 @@ jobs:
           # Check if release exists
           if gh release view "${{ env.next_release_tag }}" > /dev/null 2>&1; then
             echo "Updating existing release with new build..."
-            gh release upload "${{ env.next_release_tag }}" libscxwebrtc.aar LICENSE.md NOTICE --clobber
+            gh release upload "${{ env.next_release_tag }}" libscxwebrtc.aar LICENSE NOTICE --clobber
             echo "✓ Release updated"
           else
             echo "Creating new release..."
-            gh release create "${{ env.next_release_tag }}" -t "${{ env.next_release_milestone }}" -F changelog.md "libscxwebrtc.aar" LICENSE.md NOTICE
+            gh release create "${{ env.next_release_tag }}" -t "${{ env.next_release_milestone }}" -F changelog.md "libscxwebrtc.aar" LICENSE NOTICE
             echo "✓ Release created"
           fi
 

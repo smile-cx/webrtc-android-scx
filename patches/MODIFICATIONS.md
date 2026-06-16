@@ -68,11 +68,11 @@ Beyond the source code patches, the distribution build also applies:
 
 **BSD 3-Clause (WebRTC core):**
 - Requires: Copyright notice, license text, disclaimer in all redistributions
-- Status: Preserved in LICENSE.md and NOTICE files
+- Status: Preserved in LICENSE and NOTICE files
 
 **Apache 2.0 (abseil-cpp, boringssl, protobuf):**
 - Requires: Copyright notices, license text, modification notices (Section 4.b)
-- Status: Original license texts preserved in LICENSE.md, modification notices documented in NOTICE and this file
+- Status: Original license texts preserved in LICENSE, modification notices documented in NOTICE and this file
 
 ### Modification Documentation
 

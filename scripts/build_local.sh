@@ -7,7 +7,7 @@
 # All modifications are documented in:
 #   - patches/MODIFICATIONS.md
 #   - NOTICE file
-# For license compliance information, see LICENSE.md and NOTICE.
+# For license compliance information, see LICENSE and NOTICE.
 
 set -e
 
