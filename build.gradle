@@ -8,6 +8,18 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:8.1.0'
     }
+    // AGP 8.1.0 pulls in ASM 9.2, which the shadow plugin loads from this
+    // parent classpath and which rejects Java 21 bytecode (major version 65)
+    // in freshly built WebRTC milestones. Force a newer ASM that supports it.
+    configurations.classpath {
+        resolutionStrategy {
+            force 'org.ow2.asm:asm:9.7.1'
+            force 'org.ow2.asm:asm-commons:9.7.1'
+            force 'org.ow2.asm:asm-tree:9.7.1'
+            force 'org.ow2.asm:asm-analysis:9.7.1'
+            force 'org.ow2.asm:asm-util:9.7.1'
+        }
+    }
 }
 
 group = 'cx.smile'
