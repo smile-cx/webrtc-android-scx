@@ -10,15 +10,31 @@ buildscript {
     }
     // AGP 8.1.0 pulls in ASM 9.2, which the shadow plugin loads from this
     // parent classpath and which rejects newer bytecode (e.g. major version 65
-    // for Java 21, 69 for Java 25) in freshly built WebRTC milestones. Force a
-    // newer ASM that supports it.
+    // for Java 21, 69 for Java 25) in freshly built WebRTC milestones. WebRTC's
+    // hermetic build JDK is pinned independently by Chromium infra (via CIPD)
+    // and can jump versions without notice.
+    //
+    // The CI workflow reads the actual class-file major version out of the
+    // classes.jar it just built and passes it as -PclassMajorVersion, so we
+    // pin the exact ASM release known to support that version instead of
+    // trusting whatever happens to be "latest" at build time. Entries below
+    // are only the ones we've confirmed (each new one requires ASM to have
+    // already shipped support); anything higher, or a local build with no
+    // property set, falls back to the latest 9.x release.
+    def asmVersionsByClassMajor = [
+        69: '9.8',    // Java 25
+        70: '9.9',    // Java 26
+        71: '9.10.1', // Java 27
+    ]
+    def classMajorVersion = project.findProperty('classMajorVersion') as Integer
+    def asmVersion = asmVersionsByClassMajor[classMajorVersion] ?: '9.+'
     configurations.classpath {
         resolutionStrategy {
-            force 'org.ow2.asm:asm:9.10.1'
-            force 'org.ow2.asm:asm-commons:9.10.1'
-            force 'org.ow2.asm:asm-tree:9.10.1'
-            force 'org.ow2.asm:asm-analysis:9.10.1'
-            force 'org.ow2.asm:asm-util:9.10.1'
+            force "org.ow2.asm:asm:${asmVersion}"
+            force "org.ow2.asm:asm-commons:${asmVersion}"
+            force "org.ow2.asm:asm-tree:${asmVersion}"
+            force "org.ow2.asm:asm-analysis:${asmVersion}"
+            force "org.ow2.asm:asm-util:${asmVersion}"
         }
     }
 }
