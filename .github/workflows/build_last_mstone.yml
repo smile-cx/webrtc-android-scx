@@ -77,6 +77,19 @@ jobs:
           # should_build=true means new branch available (need full rebuild)
           # should_build=false means same branch (can reuse AAR if exists)
 
+          # A previous run may have built WebRTC successfully but failed later
+          # (e.g. in shadowing). Look for a checkpoint artifact of the base
+          # AAR for this exact milestone so we don't redo the ~1.5h WebRTC
+          # build just to retry the fast steps after it.
+          ARTIFACT_ID=$(gh api "repos/${{ github.repository }}/actions/artifacts?name=base-aar-${{ env.next_release_tag }}&per_page=100" --jq '[.artifacts[] | select(.expired == false)] | sort_by(.created_at) | reverse | .[0].id // empty')
+          if [ -n "$ARTIFACT_ID" ]; then
+            echo "✓ Found cached base AAR checkpoint for milestone ${{ env.next_release_tag }} (artifact $ARTIFACT_ID)"
+            echo "has_cached_base_aar=true" >> $GITHUB_OUTPUT
+            echo "cached_base_aar_id=$ARTIFACT_ID" >> $GITHUB_OUTPUT
+          else
+            echo "has_cached_base_aar=false" >> $GITHUB_OUTPUT
+          fi
+
           if [ "${{ env.should_build }}" = "true" ]; then
             echo "New branch ${{ env.next_release_branch }} available - will rebuild from scratch"
             echo "has_existing_aar=false" >> $GITHUB_OUTPUT
@@ -112,7 +125,7 @@ jobs:
           fi
 
       - name: Maximize build disk space (1)
-        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true'
+        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true' && steps.check_release.outputs.has_cached_base_aar != 'true'
         uses: easimon/maximize-build-space@master
         with:
           root-reserve-mb: 512
@@ -120,7 +133,7 @@ jobs:
           remove-dotnet: 'true'
 
       - name: Maximize build space (2)
-        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true'
+        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true' && steps.check_release.outputs.has_cached_base_aar != 'true'
         run: |
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /opt/ghc
@@ -131,8 +144,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Restore cached base AAR
+        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true' && steps.check_release.outputs.has_cached_base_aar == 'true'
+        run: |
+          echo "Restoring base AAR from checkpoint artifact ${{ steps.check_release.outputs.cached_base_aar_id }}..."
+          gh api "repos/${{ github.repository }}/actions/artifacts/${{ steps.check_release.outputs.cached_base_aar_id }}/zip" > base-aar-checkpoint.zip
+          unzip -q -o base-aar-checkpoint.zip -d .
+          rm base-aar-checkpoint.zip
+          echo "✓ Restored libscxwebrtc.aar and LICENSE - skipping WebRTC rebuild"
+
       - name: Checkout WebRTC
-        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true'
+        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true' && steps.check_release.outputs.has_cached_base_aar != 'true'
         run: |
           source "${GITHUB_WORKSPACE}/scripts/checkout_webrtc.sh";
           echo "${PATH}" >> $GITHUB_PATH
@@ -141,7 +163,7 @@ jobs:
           WEBRTC_BRANCH: ${{ env.next_release_branch  }}
 
       - name: Apply SmileCX patches
-        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true'
+        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true' && steps.check_release.outputs.has_cached_base_aar != 'true'
         run: |
           cd src
           echo "Applying jni_prefix_smile patch with fuzzy matching..."
@@ -168,13 +190,13 @@ jobs:
           grep -q "Java_cx_smile_org_webrtc" sdk/android/src/jni/jni_helpers.h && echo "✓ JNI helpers updated" || echo "✗ JNI helpers NOT updated"
 
       - name: Build WebRTC
-        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true'
+        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true' && steps.check_release.outputs.has_cached_base_aar != 'true'
         run: |
           cd src
           source "${GITHUB_WORKSPACE}/scripts/build_webrtc.sh"
 
       - name: Post-process LICENSE file
-        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true'
+        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true' && steps.check_release.outputs.has_cached_base_aar != 'true'
         run: |
           cd src
           if [ -f LICENSE.md ]; then
@@ -241,10 +263,20 @@ jobs:
           fi
 
       - name: Create SDK (base AAR)
-        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true'
+        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true' && steps.check_release.outputs.has_cached_base_aar != 'true'
         run: |
           mv ./src/libscxwebrtc.aar .
           mv ./src/LICENSE .
+
+      - name: Save base AAR checkpoint
+        if: env.should_build == 'true' && steps.check_release.outputs.has_existing_aar != 'true' && steps.check_release.outputs.has_cached_base_aar != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: base-aar-${{ env.next_release_tag }}
+          path: |
+            libscxwebrtc.aar
+            LICENSE
+          retention-days: 14
 
       - name: Set up JDK 17 for shadowing
         if: (env.should_build == 'true' || steps.check_release.outputs.has_existing_aar == 'true') && steps.check_release.outputs.already_shadowed != 'true'
