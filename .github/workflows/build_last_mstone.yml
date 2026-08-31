@@ -302,8 +302,10 @@ jobs:
           # Detect the actual bytecode version WebRTC's hermetic JDK produced
           # and save it so we can pin the exact ASM release known to support
           # it, instead of trusting whatever ASM is "latest" at build time.
-          python3 -c "
-          import os, zipfile, struct
+          # (Captured into a shell var, not $GITHUB_ENV - that only takes
+          # effect in later steps, not later commands in this same script.)
+          CLASS_MAJOR_VERSION=$(python3 -c "
+          import zipfile, struct
           major = 0
           with zipfile.ZipFile('android-scx/shadow/libs/classes.jar') as z:
               for n in z.namelist():
@@ -311,13 +313,12 @@ jobs:
                       with z.open(n) as f:
                           f.read(6)
                           major = max(major, struct.unpack('>H', f.read(2))[0])
-          print(f'::notice::classes.jar class-file major version {major} (Java {major - 44})')
-          with open(os.environ['GITHUB_ENV'], 'a') as env:
-              env.write(f'class_major_version={major}\n')
-          "
+          print(major)
+          ")
+          echo "::notice::classes.jar class-file major version ${CLASS_MAJOR_VERSION} (Java $((CLASS_MAJOR_VERSION - 44)))"
 
           # Run shadow JAR creation
-          ./gradlew :android-scx:shadow:shadowJar -PVERSION_NAME=${{ env.next_release_tag }} -PclassMajorVersion=${{ env.class_major_version }}
+          ./gradlew :android-scx:shadow:shadowJar -PVERSION_NAME=${{ env.next_release_tag }} -PclassMajorVersion=${CLASS_MAJOR_VERSION}
 
           # Replace classes.jar with shadowed version
           cp android-scx/shadow/build/libs/webrtc-shadowed.jar aar-extract/classes.jar
