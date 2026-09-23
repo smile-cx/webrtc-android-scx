@@ -11,6 +11,7 @@ checkout_depot_tools() {
         cd ..
     fi
     export PATH=$(pwd)/depot_tools:$PATH
+    ensure_bootstrap
 }
 
 checkout_webrtc() {
